@@ -33,7 +33,8 @@ class FillTest(unittest.TestCase):
     def test_readme_has_a_live_demo(self) -> None:
         text = (ROOT / "README.md").read_text(encoding="utf-8")
         self.assertIn("<!-- demo: live -start -->", text)
-        self.assertIn("docs/demo.svg", text)
+        self.assertIn('href="https://github.com/YauhenBichel"', text)
+        self.assertIn("avatars.githubusercontent.com/YauhenBichel", text)
         self.assertTrue((ROOT / "docs" / "demo.svg").is_file())
         self.assertIn("<svg", (ROOT / "docs" / "demo.svg").read_text(encoding="utf-8"))
         self.assertIn("layout: tiles", text)
@@ -184,6 +185,53 @@ class FillTest(unittest.TestCase):
         )
         self.assertIn("github.com/carol", html)
         self.assertNotIn("<table>", html)
+
+
+    def test_every_svg_face_links_to_the_profile(self) -> None:
+        people = [
+            {"login": "alice", "name": "Alice Example"},
+            {"login": "bob", "name": "Bob"},
+        ]
+        svg = self.mod.render_svg(people, {"alice": self.mod.TINY_PNG})
+        self.assertIn('<a href="https://github.com/alice" target="_top">', svg)
+        self.assertIn('<a href="https://github.com/bob" target="_top">', svg)
+        alice = svg.split('<a href="https://github.com/alice"', 1)[1].split(
+            "</a>", 1
+        )[0]
+        self.assertIn("clip-path", alice)
+        bob = svg.split('<a href="https://github.com/bob"', 1)[1].split("</a>", 1)[0]
+        self.assertIn("hsl(", bob)
+
+    def test_readme_icons_are_profile_links(self) -> None:
+        people = [
+            {"login": "alice", "name": "Alice"},
+            {"login": "bob", "name": "Bob"},
+        ]
+        html = self.mod.render_wall(
+            people,
+            svg_href=".github/contributors.svg",
+            svg_width=200,
+            format="svg",
+        )
+        self.assertIn(
+            '<a href="https://github.com/alice" title="Alice">', html
+        )
+        self.assertIn(
+            'src="https://avatars.githubusercontent.com/alice?s=144"', html
+        )
+        self.assertIn('<a href="https://github.com/bob" title="Bob">', html)
+        self.assertGreaterEqual(html.count('<a href="https://github.com/'), 4)
+        self.assertNotIn("contributors.svg", html)
+        self.assertNotIn("<table>", html)
+
+    def test_contributors_workflow_opens_a_pull_request(self) -> None:
+        text = (ROOT / ".github" / "workflows" / "contributors.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("gh pr create", text)
+        self.assertIn("pull-requests: write", text)
+        self.assertIn("format: html", text)
+        self.assertNotIn("git push\n", text.replace("git push --force", ""))
 
     def test_display_names_are_escaped(self) -> None:
         nasty = [{"login": "eve", "name": "<script>alert(1)</script>"}]
