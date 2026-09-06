@@ -41,6 +41,8 @@ jobs:
           mkdir _site
           cp docs/index.html docs/.nojekyll _site/
           cp docs/*.svg _site/
+          mkdir -p _site/faces
+          cp docs/faces/*.svg _site/faces/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
