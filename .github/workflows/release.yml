@@ -1,0 +1,110 @@
+name: Release
+
+# Cuts a GitHub Release that Marketplace can list.
+# GitHub has no API for the Marketplace checkbox. After this job,
+# open the printed edit URL, tick "Publish this Action to the GitHub
+# Marketplace", pick categories, and save. 2FA is required.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Semver without the leading v (for example 1.4.0)
+        required: true
+        type: string
+      draft:
+        description: Create a draft so the Marketplace box can be ticked before publish
+        required: false
+        type: boolean
+        default: false
+      move-major:
+        description: Point the floating vMAJOR tag at this commit
+        required: false
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Check the version and action.yml
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          set -euo pipefail
+          echo "$VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'
+          grep -q '^name:' action.yml
+          grep -q '^description:' action.yml
+          grep -q '^branding:' action.yml
+          grep -q 'icon:' action.yml
+          grep -q 'color:' action.yml
+
+      - name: Tests
+        run: python3 -m unittest discover -s tests -q
+
+      - name: Tag and release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+          DRAFT: ${{ inputs.draft }}
+          MOVE_MAJOR: ${{ inputs.move-major }}
+        run: |
+          set -euo pipefail
+          TAG="v${VERSION}"
+          MAJOR="v${VERSION%%.*}"
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "tag $TAG already exists" >&2
+            exit 1
+          fi
+          git tag -a "$TAG" -m "$TAG"
+          git push origin "$TAG"
+          NOTES="$(cat <<EOF
+          ## Use it
+
+          \`\`\`yaml
+          - uses: ${GITHUB_REPOSITORY}@${TAG}
+          \`\`\`
+
+          Pin this tag, or the commit SHA, when the job has \`contents: write\`.
+
+          ## Marketplace
+
+          GitHub does not expose an API for the listing checkbox.
+          Edit this release:
+
+          https://github.com/${GITHUB_REPOSITORY}/releases/edit/${TAG}
+
+          Tick **Publish this Action to the GitHub Marketplace**, choose
+          **Utilities**, then save. That needs your login and 2FA.
+          EOF
+          )"
+          EXTRA=()
+          if [ "$DRAFT" = "true" ]; then
+            EXTRA+=(--draft)
+          fi
+          gh release create "$TAG" --title "$TAG" --notes "$NOTES" "${EXTRA[@]}"
+          if [ "$MOVE_MAJOR" = "true" ]; then
+            git tag -f "$MAJOR" "$TAG"
+            git push origin "refs/tags/${MAJOR}" --force
+          fi
+          echo "Release: https://github.com/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
+          echo "Marketplace edit: https://github.com/${GITHUB_REPOSITORY}/releases/edit/${TAG}"
+          {
+            echo "### Release ${TAG}"
+            echo
+            echo "Edit and tick Marketplace: https://github.com/${GITHUB_REPOSITORY}/releases/edit/${TAG}"
+          } >> "$GITHUB_STEP_SUMMARY"
