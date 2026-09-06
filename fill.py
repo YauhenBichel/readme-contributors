@@ -931,7 +931,12 @@ def apply_readme(text: str, block: str) -> str:
     start = _start()
     end = _end()
     if start not in text or end not in text:
-        raise SystemExit(f"README is missing {start} / {end}")
+        raise SystemExit(
+            "README is missing markers.\n\n"
+            "Example comments to paste into your README:\n"
+            f"{start}\n"
+            f"{end}"
+        )
     before, rest = text.split(start, 1)
     _, after = rest.split(end, 1)
     return f"{before}{start}\n{block}{end}{after}"
