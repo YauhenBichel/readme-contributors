@@ -34,7 +34,7 @@ class FillTest(unittest.TestCase):
         text = (ROOT / "README.md").read_text(encoding="utf-8")
         self.assertIn("<!-- demo: live -start -->", text)
         self.assertIn('href="https://github.com/YauhenBichel"', text)
-        self.assertIn("avatars.githubusercontent.com/YauhenBichel", text)
+        self.assertIn(".github/faces/YauhenBichel.svg", text)
         self.assertTrue((ROOT / "docs" / "demo.svg").is_file())
         self.assertIn("<svg", (ROOT / "docs" / "demo.svg").read_text(encoding="utf-8"))
         self.assertIn("layout: tiles", text)
@@ -46,6 +46,7 @@ class FillTest(unittest.TestCase):
         self.assertIn("YauhenBichel/merge-cheer", text)
         self.assertIn("github.com/search?q=YauhenBichel%2Freadme-contributors", text)
         for name in (
+            "layout-stickers.svg",
             "layout-grid.svg",
             "layout-tiles.svg",
             "layout-list.svg",
@@ -161,6 +162,31 @@ class FillTest(unittest.TestCase):
         self.assertIn('r="31.0"', svg)
         self.assertIn('r="20.0"', svg)
 
+    def test_stickers_tilt_the_faces(self) -> None:
+        people = [{"login": "alice", "name": "Alice"}, {"login": "bob", "name": "Bob"}]
+        svg = self.mod.render_svg(people, layout="stickers", size=64)
+        self.assertIn('filter="url(#lift)"', svg)
+        self.assertIn("rotate(-9", svg)
+        self.assertIn("rotate(7", svg)
+        self.assertIn("hsl(", svg)
+
+    def test_polaroid_has_a_name_on_the_card(self) -> None:
+        svg = self.mod.render_sticker_svg(
+            {"login": "alice", "name": "Alice Example"},
+            self.mod.TINY_PNG,
+            tilt=-9,
+        )
+        self.assertIn("Alice Example", svg)
+        self.assertIn("rotate(-9", svg)
+        self.assertIn("#fffdf8", svg)
+        self.assertIn("data:image/png;base64,", svg)
+
+    def test_long_sticker_name_is_shortened(self) -> None:
+        svg = self.mod.render_sticker_svg(
+            {"login": "alice", "name": "A Very Long Display Name"}
+        )
+        self.assertIn(">A Very Long…</text>", svg)
+
     def test_unknown_layout_is_a_refusal(self) -> None:
         with self.assertRaises(SystemExit) as raised:
             self.mod.parse_layout("carousel")
@@ -177,6 +203,7 @@ class FillTest(unittest.TestCase):
         self.assertIn("theme:", text)
         self.assertIn("LAYOUT:", text)
         self.assertIn("THEME:", text)
+        self.assertIn("FACES_PATH:", text)
 
     def test_html_mode_has_no_table(self) -> None:
         html = self.mod.render_wall(
@@ -217,12 +244,23 @@ class FillTest(unittest.TestCase):
             '<a href="https://github.com/alice" title="Alice">', html
         )
         self.assertIn(
-            'src="https://avatars.githubusercontent.com/alice?s=144"', html
+            'src="https://avatars.githubusercontent.com/alice?s=174"', html
         )
         self.assertIn('<a href="https://github.com/bob" title="Bob">', html)
-        self.assertGreaterEqual(html.count('<a href="https://github.com/'), 4)
+        self.assertIn('width="87"', html)
+        self.assertIn('width="66"', html)
+        self.assertEqual(html.count('<a href="https://github.com/'), 2)
         self.assertNotIn("contributors.svg", html)
         self.assertNotIn("<table>", html)
+        self.assertNotIn("<br", html)
+
+    def test_readme_icons_can_use_polaroid_files(self) -> None:
+        html = self.mod.render_wall(
+            [{"login": "alice", "name": "Alice"}],
+            faces_href=".github/faces",
+        )
+        self.assertIn('src=".github/faces/alice.svg"', html)
+        self.assertIn('href="https://github.com/alice"', html)
 
     def test_contributors_workflow_opens_a_pull_request(self) -> None:
         text = (ROOT / ".github" / "workflows" / "contributors.yml").read_text(
@@ -231,6 +269,7 @@ class FillTest(unittest.TestCase):
         self.assertIn("gh pr create", text)
         self.assertIn("pull-requests: write", text)
         self.assertIn("format: html", text)
+        self.assertIn(".github/faces", text)
         self.assertIn("Actions cannot open a pull request", text)
         self.assertNotIn("git push\n", text.replace("git push --force", ""))
 
@@ -307,6 +346,7 @@ class FillTest(unittest.TestCase):
                 return [{"login": "alice", "name": "Alice"}]
 
             self.mod.list_people = people  # type: ignore[method-assign]
+            self.mod.fetch_avatars = lambda *_a, **_k: {}  # type: ignore[method-assign]
             try:
                 for key, value in env.items():
                     __import__("os").environ[key] = value

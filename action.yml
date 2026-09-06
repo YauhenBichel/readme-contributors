@@ -1,7 +1,7 @@
 name: README contributors
 description: >
-  Fill a README with a circular-avatar contributors wall from the GitHub
-  API. Bots are omitted. No third-party list service.
+  Fill a README with clickable polaroid stickers from the GitHub
+  contributors API. Bots are omitted. No third-party list service.
 author: readme-contributors
 branding:
   icon: users
@@ -15,12 +15,12 @@ inputs:
     description: Where to write the generated SVG wall (format=svg)
     default: .github/contributors.svg
   format:
-    description: svg (wall file plus clickable README icons) or html (linked avatars only)
+    description: svg (wall file plus clickable README stickers) or html (stickers only)
     default: svg
   layout:
     description: >
-      Wall layout. One of facepile (default), grid, tiles, list, compact,
-      wave, orbit, honeycomb, ribbon, constellation, banner.
+      Wall layout. One of facepile (default), stickers, grid, tiles, list,
+      compact, wave, orbit, honeycomb, ribbon, constellation, banner.
     default: facepile
   theme:
     description: >
@@ -30,6 +30,9 @@ inputs:
   columns:
     description: Faces per row
     default: "8"
+  faces:
+    description: Folder of one polaroid SVG per person (README icons)
+    default: .github/faces
   avatar-size:
     description: Face diameter in pixels
     default: "72"
@@ -71,6 +74,7 @@ runs:
         CONTRIBUTORS_REPO: ${{ inputs.repository }}
         README_PATH: ${{ inputs.readme }}
         SVG_PATH: ${{ inputs.svg }}
+        FACES_PATH: ${{ inputs.faces }}
         FORMAT: ${{ inputs.format }}
         LAYOUT: ${{ inputs.layout }}
         THEME: ${{ inputs.theme }}

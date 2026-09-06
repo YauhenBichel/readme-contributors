@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Fill a README contributors wall from the GitHub API.
 
-Bots are omitted. The default drawing is a circular facepile SVG so the
-README does not pick up GitHub's table borders. Every face is a link to
-that person's GitHub profile. Layouts and themes change the
+Bots are omitted. The README wall is one clickable polaroid sticker
+per person (GitHub cannot click inside a single SVG image). The SVG
+file is still written for Pages. Layouts and themes change the
 drawing; they do not change who is listed.
 """
 
@@ -30,6 +30,7 @@ TINY_PNG = bytes.fromhex(
 )
 LAYOUTS = (
     "facepile",
+    "stickers",
     "grid",
     "tiles",
     "list",
@@ -41,6 +42,8 @@ LAYOUTS = (
     "constellation",
     "banner",
 )
+_STICKER_TILT = (-9, 7, -5, 11, -8, 4)
+_STICKER_SCALE = (1.22, 0.92, 1.0, 1.12, 0.88, 1.06)
 THEMES = {
     "auto": {
         "ring": "#ffffff",
@@ -434,6 +437,27 @@ def _placements(
             )
         return width, height, spots
 
+    if layout == "stickers":
+        pad = 28 if framed else 22
+        step = int(size * 1.24)
+        row_gap = int(size * 0.46)
+        rows = (count + columns - 1) // columns
+        widest = min(columns, count)
+        width = pad * 2 + step * max(0, widest - 1) + size
+        height = pad * 2 + (size + row_gap) * max(0, rows - 1) + size
+        for index in range(count):
+            column = index % columns
+            row = index // columns
+            spots.append(
+                (
+                    index,
+                    float(pad + column * step),
+                    float(pad + row * (size + row_gap)),
+                    size,
+                )
+            )
+        return width, height, spots
+
     if layout == "compact":
         pad = 10 if framed else 6
         step = size + 6
@@ -579,6 +603,15 @@ def render_svg(
     )
     names = ", ".join(person["name"] for person in people)
     defs: list[str] = _theme_css(palette)
+    if layout == "stickers":
+        defs.extend(
+            [
+                '<filter id="lift" x="-20%" y="-20%" width="140%" height="140%">'
+                '<feDropShadow dx="0" dy="3" stdDeviation="3" flood-opacity="0.22"/>'
+                "</filter>",
+                "<style>.ring { stroke-width: 7; }</style>",
+            ]
+        )
     body: list[str] = []
     if palette.get("bg"):
         body.append(
@@ -639,9 +672,27 @@ def render_svg(
                 f'y="{y + face * 0.72:.1f}" font-size="12">@{login}</text>'
             )
         href = f"https://github.com/{_xml(person['login'])}"
-        body.append(f'<a href="{href}" target="_top">')
-        body.extend(face_bits)
-        body.append("</a>")
+        if layout == "stickers":
+            hue = _hue(person["login"])
+            face_bits.append(
+                f'<circle cx="{x + face / 2:.1f}" cy="{y + face / 2:.1f}" '
+                f'r="{face / 2:.1f}" fill="none" '
+                f'stroke="hsl({hue}, 78%, 58%)" stroke-width="6"/>'
+            )
+            cx = x + face / 2
+            cy = y + face / 2
+            tilt = _STICKER_TILT[index % len(_STICKER_TILT)]
+            body.append(
+                f'<a href="{href}" target="_top">'
+                f'<g transform="rotate({tilt} {cx:.1f} {cy:.1f})" '
+                f'filter="url(#lift)">'
+            )
+            body.extend(face_bits)
+            body.append("</g></a>")
+        else:
+            body.append(f'<a href="{href}" target="_top">')
+            body.extend(face_bits)
+            body.append("</a>")
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" '
         f'height="{height}" role="img" aria-label="{_xml(names)}">\n'
@@ -654,25 +705,182 @@ def render_svg(
     )
 
 
+def _sticker_size(size: int, index: int) -> int:
+    return max(40, int(size * _STICKER_SCALE[index % len(_STICKER_SCALE)]))
+
+
+def _face_file(login: str) -> str:
+    safe = "".join(ch if ch.isalnum() or ch in "._-" else "_" for ch in login)
+    return f"{safe or 'face'}.svg"
+
+
+def _short_label(name: str, limit: int = 13) -> str:
+    text = name.strip() or "?"
+    if len(text) <= limit:
+        return text
+    return text[: limit - 1].rstrip() + "…"
+
+
+def sticker_canvas(size: int) -> tuple[int, int]:
+    """Pixel size of one polaroid SVG, including the tilt gutter."""
+    size = max(32, size)
+    inset = max(7, int(size * 0.11))
+    band = max(20, int(size * 0.34))
+    margin = max(10, int(size * 0.2))
+    return size + inset * 2 + margin * 2, size + inset + band + margin * 2
+
+
+def render_sticker_svg(
+    person: Mapping[str, str],
+    payload: bytes | None = None,
+    *,
+    size: int = 72,
+    tilt: int = 0,
+) -> str:
+    """One tilted polaroid. Used as a README <img> so the face stays a link."""
+    size = max(32, size)
+    login = person["login"]
+    name = person["name"]
+    hue = _hue(login)
+    inset = max(7, int(size * 0.11))
+    band = max(20, int(size * 0.34))
+    card_w = size + inset * 2
+    card_h = size + inset + band
+    margin = max(10, int(size * 0.2))
+    width = card_w + margin * 2
+    height = card_h + margin * 2
+    ox = float(margin)
+    oy = float(margin)
+    fx = ox + inset + size / 2
+    fy = oy + inset + size / 2
+    radius = size / 2
+    cx = width / 2
+    cy = height / 2
+    ring = max(5, int(size * 0.08))
+    label = _xml(_short_label(name))
+    defs = [
+        '<filter id="lift" x="-25%" y="-25%" width="150%" height="150%">'
+        '<feDropShadow dx="0" dy="2.5" stdDeviation="2.2" '
+        'flood-color="#111827" flood-opacity="0.28"/>'
+        "</filter>",
+        f'<clipPath id="face"><circle cx="{fx:.1f}" cy="{fy:.1f}" '
+        f'r="{radius:.1f}"/></clipPath>',
+    ]
+    photo: list[str] = []
+    if payload:
+        photo.append(
+            f'<image href="{_data_uri(payload)}" x="{ox + inset:.1f}" '
+            f'y="{oy + inset:.1f}" width="{size}" height="{size}" '
+            f'clip-path="url(#face)" />'
+        )
+    else:
+        photo.append(
+            f'<circle cx="{fx:.1f}" cy="{fy:.1f}" r="{radius:.1f}" '
+            f'fill="hsl({hue}, 52%, 48%)"/>'
+        )
+        photo.append(
+            f'<text x="{fx:.1f}" y="{fy + size * 0.12:.1f}" '
+            f'text-anchor="middle" fill="#ffffff" '
+            f'font-size="{size * 0.34:.0f}" font-family="{_font()}" '
+            f'font-weight="700">{_xml(_initials(name))}</text>'
+        )
+    photo.append(
+        f'<circle cx="{fx:.1f}" cy="{fy:.1f}" r="{radius:.1f}" fill="none" '
+        f'stroke="hsl({hue}, 78%, 58%)" stroke-width="{ring}"/>'
+    )
+    photo.append(
+        f'<text x="{cx:.1f}" y="{oy + inset + size + band * 0.68:.1f}" '
+        f'text-anchor="middle" fill="#1f2328" '
+        f'font-size="{max(11, int(size * 0.2))}" font-family="{_font()}" '
+        f'font-weight="700">{label}</text>'
+    )
+    return (
+        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" '
+        f'height="{height}" role="img" aria-label="{_xml(name)}">\n'
+        f"<title>{_xml(name)}</title>\n"
+        "<defs>\n"
+        + "\n".join(defs)
+        + "\n</defs>\n"
+        f'<g transform="rotate({tilt} {cx:.1f} {cy:.1f})" filter="url(#lift)">\n'
+        f'<rect x="{ox:.1f}" y="{oy:.1f}" width="{card_w}" height="{card_h}" '
+        f'rx="14" fill="#fffdf8"/>\n'
+        + "\n".join(photo)
+        + "\n</g>\n</svg>\n"
+    )
+
+
+def write_faces(
+    directory: Path,
+    people: list[dict[str, str]],
+    avatars: Mapping[str, bytes] | None = None,
+    *,
+    size: int = 72,
+) -> None:
+    directory.mkdir(parents=True, exist_ok=True)
+    pictures = avatars or {}
+    for index, person in enumerate(people):
+        (directory / _face_file(person["login"])).write_text(
+            render_sticker_svg(
+                person,
+                pictures.get(person["login"]),
+                size=size,
+                tilt=_STICKER_TILT[index % len(_STICKER_TILT)],
+            ),
+            encoding="utf-8",
+        )
+
+
+def faces_current(
+    directory: Path,
+    people: list[dict[str, str]],
+    avatars: Mapping[str, bytes] | None = None,
+    *,
+    size: int = 72,
+) -> bool:
+    pictures = avatars or {}
+    for index, person in enumerate(people):
+        path = directory / _face_file(person["login"])
+        if not path.is_file():
+            return False
+        expected = render_sticker_svg(
+            person,
+            pictures.get(person["login"]),
+            size=size,
+            tilt=_STICKER_TILT[index % len(_STICKER_TILT)],
+        )
+        if path.read_text(encoding="utf-8") != expected:
+            return False
+    return True
+
+
 def render_html(
     people: list[dict[str, str]],
     *,
     size: int = 72,
+    faces_href: str = "",
 ) -> str:
-    """Linked avatars that wrap. No table, so GitHub draws no grid."""
+    """Clickable stickers. No table, so GitHub draws no grid."""
     if not people:
         return ""
-    faces = []
-    for person in people:
+    cards = []
+    prefix = faces_href.rstrip("/")
+    for index, person in enumerate(people):
         login = _xml(person["login"])
         name = _xml(person["name"])
-        faces.append(
+        face = _sticker_size(size, index)
+        if prefix:
+            src = f"{prefix}/{_face_file(person['login'])}"
+            canvas_w, canvas_h = sticker_canvas(size)
+            height = max(1, int(face * canvas_h / canvas_w))
+        else:
+            src = f"https://avatars.githubusercontent.com/{login}?s={face * 2}"
+            height = face
+        cards.append(
             f'<a href="https://github.com/{login}" title="{name}">'
-            f'<img src="https://avatars.githubusercontent.com/{login}'
-            f'?s={size * 2}" width="{size}" height="{size}" alt="{name}" />'
+            f'<img src="{src}" width="{face}" height="{height}" alt="{name}" />'
             "</a>"
         )
-    return '<p align="center">\n  ' + "\n  ".join(faces) + "\n</p>\n"
+    return '<p align="center">\n  ' + "\n  ".join(cards) + "\n</p>\n"
 
 
 def render_names(people: list[dict[str, str]]) -> str:
@@ -693,15 +901,12 @@ def render_wall(
     svg_width: int = 0,
     size: int = 72,
     format: str = "svg",
+    faces_href: str = "",
 ) -> str:
-    names = render_names(people)
-    icons = render_html(people, size=size)
-    if format == "html" or not svg_href:
-        return icons + names
-    # GitHub renders <img src="*.svg"> as one picture, so an <a> inside
-    # the SVG file is not a README link. Each icon is therefore its own
-    # <a><img></a>. The SVG file is still written for Pages.
-    return icons + names
+    # GitHub renders <img src="*.svg"> as one picture. The README wall is
+    # one polaroid <a><img></a> per person so every face stays a link.
+    _ = (svg_href, svg_width, format)
+    return render_html(people, size=size, faces_href=faces_href)
 
 
 def svg_width(
@@ -768,12 +973,12 @@ def main() -> int:
     if not repo:
         raise SystemExit("GITHUB_REPOSITORY is required (owner/name)")
     people = list_people(repo, token, limit)
-    avatars: dict[str, bytes] = {}
+    faces_dir = root / os.environ.get("FACES_PATH", ".github/faces")
+    avatars: dict[str, bytes] = fetch_avatars(people, token, size) if people else {}
     href = ""
     width = 0
     svg_text = ""
     if fmt == "svg":
-        avatars = fetch_avatars(people, token, size)
         svg_text = render_svg(
             people,
             avatars,
@@ -786,12 +991,16 @@ def main() -> int:
         if not href.startswith("."):
             href = f"./{href}"
         width = svg_width(people, size, columns, layout=layout, theme=theme)
+    faces_href = Path(os.path.relpath(faces_dir, start=readme.parent)).as_posix()
+    if not faces_href.startswith("."):
+        faces_href = f"./{faces_href}"
     block = render_wall(
         people,
         svg_href=href,
         svg_width=width,
         size=size,
         format=fmt,
+        faces_href=faces_href,
     )
     updated = apply_readme(readme.read_text(encoding="utf-8"), block)
     same_readme = updated == readme.read_text(encoding="utf-8")
@@ -800,7 +1009,8 @@ def main() -> int:
         same_svg = svg_path.is_file() and svg_path.read_text(
             encoding="utf-8"
         ) == svg_text
-    if same_readme and same_svg:
+    same_faces = faces_current(faces_dir, people, avatars, size=size)
+    if same_readme and same_svg and same_faces:
         print(f"README contributors already current ({len(people)} people)")
         _emit("count", str(len(people)))
         _emit("changed", "false")
@@ -813,6 +1023,7 @@ def main() -> int:
     if fmt == "svg":
         svg_path.parent.mkdir(parents=True, exist_ok=True)
         svg_path.write_text(svg_text, encoding="utf-8")
+    write_faces(faces_dir, people, avatars, size=size)
     readme.write_text(updated, encoding="utf-8")
     print(f"wrote {len(people)} contributors")
     _emit("count", str(len(people)))
