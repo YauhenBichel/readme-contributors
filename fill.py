@@ -751,7 +751,12 @@ def main() -> int:
     root = _root()
     readme = root / os.environ.get("README_PATH", "README.md")
     svg_path = root / os.environ.get("SVG_PATH", ".github/contributors.svg")
-    repo = os.environ.get("GITHUB_REPOSITORY", "").strip()
+    # Actions forbids overriding GITHUB_REPOSITORY in a composite env block,
+    # so the live demo passes the source repo as CONTRIBUTORS_REPO.
+    repo = (
+        os.environ.get("CONTRIBUTORS_REPO", "").strip()
+        or os.environ.get("GITHUB_REPOSITORY", "").strip()
+    )
     token = os.environ.get("GITHUB_TOKEN", "").strip()
     fmt = os.environ.get("FORMAT", "svg").strip().lower() or "svg"
     columns = _int_env("COLUMNS", 8)

@@ -58,7 +58,10 @@ jobs:
           git push --force --set-upstream origin docs/contributors
           NUMBER="$(gh pr list --head docs/contributors --state open --json number -q '.[0].number')"
           if [ -z "$NUMBER" ]; then
-            gh pr create --base "$DEFAULT_BRANCH" --head docs/contributors \
+            if ! gh pr create --base "$DEFAULT_BRANCH" --head docs/contributors \
               --title "docs: refresh live demo and contributors" \
-              --body "Filled from the GitHub contributors API, bots omitted. Opened because main takes changes only through a pull request."
+              --body "Filled from the GitHub contributors API, bots omitted. Opened because main takes changes only through a pull request."; then
+              echo "Actions cannot open a pull request in this repository."
+              echo "Open https://github.com/${GITHUB_REPOSITORY}/compare/${DEFAULT_BRANCH}...docs/contributors?expand=1"
+            fi
           fi

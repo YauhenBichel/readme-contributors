@@ -231,6 +231,7 @@ class FillTest(unittest.TestCase):
         self.assertIn("gh pr create", text)
         self.assertIn("pull-requests: write", text)
         self.assertIn("format: html", text)
+        self.assertIn("Actions cannot open a pull request", text)
         self.assertNotIn("git push\n", text.replace("git push --force", ""))
 
     def test_display_names_are_escaped(self) -> None:
@@ -251,6 +252,41 @@ class FillTest(unittest.TestCase):
     def test_empty_list_is_a_blank_wall(self) -> None:
         self.assertEqual(self.mod.render_html([]), "")
         self.assertIn("<svg", self.mod.render_svg([]))
+
+    def test_contributors_repo_wins_over_github_repository(self) -> None:
+        """Actions ignores GITHUB_REPOSITORY in a composite env block."""
+        seen: list[str] = []
+
+        def people(repo: str, _token: str, limit: int = 48):
+            seen.append(repo)
+            return []
+
+        self.mod.list_people = people  # type: ignore[method-assign]
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            readme = root / "README.md"
+            start = self.mod.DEFAULT_START
+            end = self.mod.DEFAULT_END
+            readme.write_text(f"{start}\n{end}\n", encoding="utf-8")
+            env = {
+                "GITHUB_WORKSPACE": str(root),
+                "GITHUB_REPOSITORY": "this/repo",
+                "CONTRIBUTORS_REPO": "YauhenBichel/py-harness",
+                "FORMAT": "html",
+            }
+            old = {key: __import__("os").environ.get(key) for key in env}
+            try:
+                for key, value in env.items():
+                    __import__("os").environ[key] = value
+                with mock.patch("sys.stdout", new=StringIO()):
+                    self.mod.main()
+            finally:
+                for key, value in old.items():
+                    if value is None:
+                        __import__("os").environ.pop(key, None)
+                    else:
+                        __import__("os").environ[key] = value
+        self.assertEqual(seen, ["YauhenBichel/py-harness"])
 
     def test_check_mode_does_not_write(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
