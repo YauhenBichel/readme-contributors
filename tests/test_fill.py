@@ -49,6 +49,8 @@ class FillTest(unittest.TestCase):
         self.assertIn("YauhenBichel/py-harness", text)
         self.assertIn("MoleCare/molecare-mcp", text)
         self.assertIn("#demo", text)
+        self.assertIn("./docs/media/readme-contributors-demo.gif", text)
+        self.assertTrue((ROOT / "docs" / "media" / "readme-contributors-demo.gif").is_file())
         self.assertIn("YauhenBichel/merge-cheer", text)
         self.assertIn("github.com/search?q=YauhenBichel%2Freadme-contributors", text)
         for name in (
