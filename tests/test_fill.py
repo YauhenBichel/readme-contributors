@@ -49,6 +49,10 @@ class FillTest(unittest.TestCase):
         self.assertIn("YauhenBichel/py-harness", text)
         self.assertIn("MoleCare/molecare-mcp", text)
         self.assertIn("#demo", text)
+        self.assertIn(
+            "https://github.com/user-attachments/assets/48357b51-3e83-4457-8ecc-c5e9e837538d",
+            text,
+        )
         self.assertIn("YauhenBichel/merge-cheer", text)
         self.assertIn("github.com/search?q=YauhenBichel%2Freadme-contributors", text)
         for name in (

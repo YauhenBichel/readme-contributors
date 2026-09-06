@@ -20,9 +20,12 @@ committed. Each person is a **polaroid**: face, name, a bit of tilt.
 Each card is its own link. Bots are omitted. No `<table>`. No
 third-party list service.
 
-Watch the 18s demo (plays on the Pages site):
+Watch the 18s demo:
 
-[![18s demo: polaroid wall in real READMEs](./docs/media/demo-poster.png)](https://yauhenbichel.github.io/readme-contributors/#demo)
+https://github.com/user-attachments/assets/48357b51-3e83-4457-8ecc-c5e9e837538d
+
+Same clip on the
+[Pages site](https://yauhenbichel.github.io/readme-contributors/#demo).
 
 ## Why
 
