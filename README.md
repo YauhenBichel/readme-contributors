@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/YauhenBichel/readme-contributors/actions/workflows/ci.yml/badge.svg)](https://github.com/YauhenBichel/readme-contributors/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
-[![GitHub Action](https://img.shields.io/badge/GitHub%20Action-v1.3.0-6e5494)](https://github.com/marketplace/actions/readme-contributors)
+[![GitHub Action](https://img.shields.io/badge/GitHub%20Action-v1.4.1-6e5494)](https://github.com/marketplace/actions/readme-contributors)
 [![Examples](https://img.shields.io/badge/examples-GitHub%20Pages-0969da)](https://yauhenbichel.github.io/readme-contributors/)
 [![good first issue](https://img.shields.io/github/issues/YauhenBichel/readme-contributors/good%20first%20issue)](https://github.com/YauhenBichel/readme-contributors/labels/good%20first%20issue)
 
@@ -16,10 +16,10 @@ Examples and copy-paste workflows:
 [yauhenbichel.github.io/readme-contributors](https://yauhenbichel.github.io/readme-contributors/).
 
 Any public repository can pin the
-[v1.3.0 release](https://github.com/YauhenBichel/readme-contributors/releases/tag/v1.3.0):
+[v1.4.1 release](https://github.com/YauhenBichel/readme-contributors/releases/tag/v1.4.1):
 
 ```yaml
-- uses: YauhenBichel/readme-contributors@v1.3.0
+- uses: YauhenBichel/readme-contributors@v1.4.1
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -133,7 +133,7 @@ Set `layout`. The default stays the overlapping facepile.
 </p>
 
 ```yaml
-- uses: YauhenBichel/readme-contributors@v1.3.0
+- uses: YauhenBichel/readme-contributors@v1.4.1
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: tiles
@@ -157,7 +157,7 @@ others paint a frame so the wall stays the same in both.
 </p>
 
 ```yaml
-- uses: YauhenBichel/readme-contributors@v1.3.0
+- uses: YauhenBichel/readme-contributors@v1.4.1
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: facepile
@@ -205,7 +205,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: YauhenBichel/readme-contributors@v1.3.0
+      - uses: YauhenBichel/readme-contributors@5edf389d48df27eb7cfaba6a124fd4416c7a910c # v1.4.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           # layout: tiles
