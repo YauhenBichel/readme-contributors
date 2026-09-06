@@ -1,5 +1,8 @@
 blank_issues_enabled: true
 contact_links:
+  - name: Examples (GitHub Pages)
+    url: https://yauhenbichel.github.io/readme-contributors/
+    about: How to use the Action, every layout, every theme
   - name: py-harness
     url: https://github.com/YauhenBichel/py-harness
     about: The laptop harness that uses this Action
