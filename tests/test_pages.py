@@ -63,5 +63,6 @@ class PagesTest(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("docs/index.html", text)
+        self.assertIn("docs/faces", text)
         self.assertIn("pages: write", text)
         self.assertTrue((ROOT / "docs" / ".nojekyll").is_file())
