@@ -14,6 +14,7 @@ class PagesTest(unittest.TestCase):
         text = SITE.read_text(encoding="utf-8")
         self.assertIn("uses: YauhenBichel/readme-contributors@v1.4.1", text)
         self.assertIn("&lt;!-- readme: contributors,bots/- -start --&gt;", text)
+        self.assertIn("layout: stickers", text)
         self.assertIn("layout: orbit", text)
         self.assertIn("layout: honeycomb", text)
         self.assertIn("theme: midnight", text)
@@ -30,6 +31,7 @@ class PagesTest(unittest.TestCase):
         for name in (
             "demo.svg",
             "layout-facepile.svg",
+            "layout-stickers.svg",
             "layout-grid.svg",
             "layout-tiles.svg",
             "layout-list.svg",

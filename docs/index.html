@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>README contributors — a circular wall for any GitHub repo</title>
-  <meta name="description" content="A composite GitHub Action that draws a contributors wall into a README. No table. No third-party list service. Pin v1.4.1 and pick a layout." />
+  <meta name="description" content="A composite GitHub Action that draws a contributors wall into a README. No table. No third-party list service. Pin v1.4.1 and pick a layout. README icons are clickable polaroids." />
   <style>
     :root {
       --bg: #0d1117;
@@ -24,7 +24,7 @@
     header, main, footer { width: min(920px, calc(100% - 32px)); margin: 0 auto; }
     header { padding: 56px 0 24px; }
     header p { color: var(--muted); max-width: 40rem; }
-    h1 { font-size: 2rem; letter-spacing: -0.03em; margin: 0 0 12px; }
+    h1 { font-size: 2.35rem; letter-spacing: -0.04em; margin: 0 0 12px; }
     h2 { font-size: 1.35rem; letter-spacing: -0.02em; margin: 48px 0 12px; }
     h3 { font-size: 1.05rem; margin: 0 0 8px; }
     .kicker { color: var(--accent); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.72rem; }
@@ -33,7 +33,7 @@
       background: var(--card); border: 1px solid var(--line); border-radius: 20px;
       padding: 28px 16px; margin: 28px 0 16px;
     }
-    .hero img { max-width: 100%; height: auto; }
+    .hero img, .hero object { max-width: 100%; height: auto; }
     nav { display: flex; flex-wrap: wrap; gap: 14px 20px; margin: 20px 0 0; }
     nav a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
     .used { display: grid; gap: 12px; margin: 16px 0; }
@@ -51,7 +51,11 @@
       background: var(--card); border: 1px solid var(--line); border-radius: 16px;
       padding: 18px 18px 14px;
     }
-    article img { display: block; max-width: 100%; height: auto; margin: 10px 0 12px; }
+    article img {
+      display: block; max-width: 100%; height: auto; margin: 10px 0 12px;
+      transition: transform 160ms ease;
+    }
+    article:hover img { transform: rotate(-2deg) scale(1.03); }
     article p { color: var(--muted); margin: 0 0 10px; }
     pre {
       margin: 0; padding: 12px 14px; overflow: auto;
@@ -71,9 +75,9 @@
     <p class="kicker">GitHub Action</p>
     <h1>README contributors</h1>
     <p>
-      Fill a README with a contributors wall from the GitHub API. Bots are
-      omitted. The wall is an SVG, not a <code>&lt;table&gt;</code>, so GitHub
-      does not draw a grid around it. Any public repository can pin the
+      Fill a README with clickable polaroid stickers from the GitHub API.
+      Bots are omitted. Each face is its own link. The SVG layouts below
+      are for Pages. Any public repository can pin the
       <a href="https://github.com/YauhenBichel/readme-contributors/releases/tag/v1.4.1">v1.4.1</a>
       release.
     </p>
@@ -87,9 +91,9 @@
   </header>
   <main>
     <div class="hero">
-      <img src="./demo.svg" width="310" alt="Live facepile from py-harness contributors" />
+      <object type="image/svg+xml" data="./demo.svg" width="560">Live stickers from py-harness contributors</object>
     </div>
-    <p class="note">Live demo: the default <code>facepile</code>, drawn from the py-harness contributors API.</p>
+    <p class="note">Live demo: py-harness faces. The README itself uses tilted polaroids so every card is a profile link.</p>
 
     <h2 id="used-by">Used by</h2>
     <p>Public repositories that pin this Action on their default branch.</p>
@@ -118,7 +122,7 @@
     <ol>
       <li>Add a pair of markers to <code>README.md</code>.</li>
       <li>Call the Action. Pin the release tag, or a commit SHA if the job can write.</li>
-      <li>Commit the rewritten README and <code>.github/contributors.svg</code>.</li>
+      <li>Commit the rewritten README, <code>.github/faces</code>, and <code>.github/contributors.svg</code> when you keep the SVG wall.</li>
     </ol>
     <p>Markers:</p>
     <pre>&lt;!-- readme: contributors,bots/- -start --&gt;
@@ -141,7 +145,7 @@ jobs:
       - run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add README.md .github/contributors.svg
+          git add README.md .github/contributors.svg .github/faces
           git diff --cached --quiet && exit 0
           git commit -m "docs: refresh README contributors"
           git push</pre>
@@ -152,8 +156,17 @@ jobs:
     </p>
 
     <h2 id="layouts">Layouts</h2>
-    <p>Set <code>layout</code>. The default stays the overlapping facepile.</p>
+    <p>Set <code>layout</code>. The default stays the overlapping facepile. The README wall is always the clickable polaroids.</p>
     <div class="grid two">
+      <article>
+        <h3>stickers</h3>
+        <p>Tilted cards, chunky rings, a little lift.</p>
+        <img src="./layout-stickers.svg" alt="stickers layout" />
+        <pre>- uses: YauhenBichel/readme-contributors@v1.4.1
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    layout: stickers</pre>
+      </article>
       <article>
         <h3>facepile</h3>
         <p>Overlapping circles. First person sits on top.</p>

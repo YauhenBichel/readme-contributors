@@ -4,4 +4,4 @@
 #     with:
 #       token: ${{ secrets.GITHUB_TOKEN }}
 #
-# And `git add README.md .github/contributors.svg`
+# And `git add README.md .github/contributors.svg .github/faces`

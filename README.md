@@ -7,10 +7,11 @@
 [![good first issue](https://img.shields.io/github/issues/YauhenBichel/readme-contributors/good%20first%20issue)](https://github.com/YauhenBichel/readme-contributors/labels/good%20first%20issue)
 
 A **GitHub Action** that draws a **contributors** wall into your
-**README**: circular **SVG** avatars (facepile, grid, tiles, orbit,
-honeycomb, and more). It reads the GitHub contributors API, omits
-bots, and replaces a pair of HTML markers. No `<table>`, so GitHub
-does not draw a grid. No third-party list service.
+**README**: one clickable **polaroid sticker** per person (face plus
+name), plus SVG layouts for Pages (facepile, stickers, grid, tiles,
+orbit, honeycomb, and more). It reads the GitHub contributors API,
+omits bots, and replaces a pair of HTML markers. No `<table>`, so
+GitHub does not draw a grid. No third-party list service.
 
 Examples and copy-paste workflows:
 [yauhenbichel.github.io/readme-contributors](https://yauhenbichel.github.io/readme-contributors/).
@@ -24,10 +25,9 @@ Any public repository can pin the
     token: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-GitHub draws a border on every README `<table>`. This Action does not
-use a table. The default is a self-contained SVG facepile (circular
-avatars, light and dark rings). Every icon and every name links to
-that person's GitHub profile.
+GitHub draws a border on every README `<table>`, and a single SVG
+image cannot be clicked per face. This Action writes one tilted
+polaroid per person. Tap a card to open that GitHub profile.
 
 ## Live demo
 
@@ -38,15 +38,12 @@ other repositories get.
 
 <!-- demo: live -start -->
 <p align="center">
-  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src="https://avatars.githubusercontent.com/YauhenBichel?s=144" width="72" height="72" alt="Yauhen Bichel" /></a>
-  <a href="https://github.com/xianjianlf2" title="Mark Xian"><img src="https://avatars.githubusercontent.com/xianjianlf2?s=144" width="72" height="72" alt="Mark Xian" /></a>
-  <a href="https://github.com/ItzSaurav" title="Itzsaurav"><img src="https://avatars.githubusercontent.com/ItzSaurav?s=144" width="72" height="72" alt="Itzsaurav" /></a>
-  <a href="https://github.com/svkzn" title="svkzn"><img src="https://avatars.githubusercontent.com/svkzn?s=144" width="72" height="72" alt="svkzn" /></a>
-  <a href="https://github.com/Aditya-233" title="Aditya"><img src="https://avatars.githubusercontent.com/Aditya-233?s=144" width="72" height="72" alt="Aditya" /></a>
-  <a href="https://github.com/kkkhs" title="Huangshuo Kuang"><img src="https://avatars.githubusercontent.com/kkkhs?s=144" width="72" height="72" alt="Huangshuo Kuang" /></a>
-</p>
-<p align="center">
-  <a href="https://github.com/YauhenBichel">Yauhen Bichel</a><span> · </span><a href="https://github.com/xianjianlf2">Mark Xian</a><span> · </span><a href="https://github.com/ItzSaurav">Itzsaurav</a><span> · </span><a href="https://github.com/svkzn">svkzn</a><span> · </span><a href="https://github.com/Aditya-233">Aditya</a><span> · </span><a href="https://github.com/kkkhs">Huangshuo Kuang</a>
+  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src=".github/faces/YauhenBichel.svg" width="87" height="99" alt="Yauhen Bichel" /></a>
+  <a href="https://github.com/xianjianlf2" title="Mark Xian"><img src=".github/faces/xianjianlf2.svg" width="66" height="75" alt="Mark Xian" /></a>
+  <a href="https://github.com/ItzSaurav" title="Itzsaurav"><img src=".github/faces/ItzSaurav.svg" width="72" height="82" alt="Itzsaurav" /></a>
+  <a href="https://github.com/svkzn" title="svkzn"><img src=".github/faces/svkzn.svg" width="80" height="91" alt="svkzn" /></a>
+  <a href="https://github.com/Aditya-233" title="Aditya"><img src=".github/faces/Aditya-233.svg" width="63" height="72" alt="Aditya" /></a>
+  <a href="https://github.com/kkkhs" title="Huangshuo Kuang"><img src=".github/faces/kkkhs.svg" width="76" height="87" alt="Huangshuo Kuang" /></a>
 </p>
 <!-- demo: live -end -->
 
@@ -70,7 +67,15 @@ source of truth.
 
 ## Layouts
 
-Set `layout`. The default stays the overlapping facepile.
+Set `layout`. The default stays the overlapping facepile. The README
+wall is always the clickable polaroids; `layout` changes the SVG
+drawn for Pages.
+
+**stickers** — tilted cards with a chunky ring and a drop shadow.
+
+<p align="center">
+  <img src="./docs/layout-stickers.svg" alt="stickers layout" />
+</p>
 
 **grid** — spaced circles, one row until `columns`.
 
@@ -178,10 +183,7 @@ Thank you to everyone who has helped.
 
 <!-- readme: contributors,bots/- -start -->
 <p align="center">
-  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src="https://avatars.githubusercontent.com/YauhenBichel?s=144" width="72" height="72" alt="Yauhen Bichel" /></a>
-</p>
-<p align="center">
-  <a href="https://github.com/YauhenBichel">Yauhen Bichel</a>
+  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src=".github/faces/YauhenBichel.svg" width="87" height="99" alt="Yauhen Bichel" /></a>
 </p>
 <!-- readme: contributors,bots/- -end -->
 ```
@@ -213,7 +215,7 @@ jobs:
       - run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add README.md .github/contributors.svg
+          git add README.md .github/contributors.svg .github/faces
           git diff --cached --quiet && exit 0
           git commit -m "docs: refresh README contributors"
           git push
@@ -244,8 +246,9 @@ No token, no GPU, no extra packages. `fill.py` is stdlib only.
 | --- | --- | --- |
 | `readme` | `README.md` | File that holds the markers |
 | `svg` | `.github/contributors.svg` | Generated wall (when `format` is `svg`) |
-| `format` | `svg` | README icons always link to profiles; `html` skips the SVG file |
-| `layout` | `facepile` | `facepile`, `grid`, `tiles`, `list`, `compact`, `wave`, `orbit`, `honeycomb`, `ribbon`, `constellation`, `banner` |
+| `faces` | `.github/faces` | One polaroid SVG per person |
+| `format` | `svg` | README icons always link to profiles; `html` skips the combined SVG file |
+| `layout` | `facepile` | `facepile`, `stickers`, `grid`, `tiles`, `list`, `compact`, `wave`, `orbit`, `honeycomb`, `ribbon`, `constellation`, `banner` |
 | `theme` | `auto` | `auto`, `github`, `midnight`, `sunrise`, `forest`, `ocean`, `mono` |
 | `columns` | `8` | Faces per row |
 | `avatar-size` | `72` | Face diameter, pixels |
@@ -277,10 +280,7 @@ Thank you to everyone who has helped this Action.
 
 <!-- readme: contributors,bots/- -start -->
 <p align="center">
-  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src="https://avatars.githubusercontent.com/YauhenBichel?s=144" width="72" height="72" alt="Yauhen Bichel" /></a>
-</p>
-<p align="center">
-  <a href="https://github.com/YauhenBichel">Yauhen Bichel</a>
+  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src=".github/faces/YauhenBichel.svg" width="87" height="99" alt="Yauhen Bichel" /></a>
 </p>
 <!-- readme: contributors,bots/- -end -->
 
