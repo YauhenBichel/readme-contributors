@@ -33,7 +33,13 @@
       background: var(--card); border: 1px solid var(--line); border-radius: 20px;
       padding: 28px 16px; margin: 28px 0 16px;
     }
-    .hero img, .hero object { max-width: 100%; height: auto; }
+    .hero img, .hero object, .hero video { max-width: 100%; height: auto; }
+    .demo {
+      background: var(--card); border: 1px solid var(--line); border-radius: 20px;
+      overflow: hidden; margin: 16px 0 12px;
+    }
+    .demo video { display: block; width: 100%; height: auto; background: #010409; }
+    .explain p { color: var(--muted); max-width: 40rem; }
     .live {
       display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end;
       gap: 4px 6px; width: 100%;
@@ -94,15 +100,53 @@
       release.
     </p>
     <nav>
+      <a href="#what">What</a>
+      <a href="#why">Why</a>
+      <a href="#demo">Video</a>
       <a href="#live">Live demo</a>
-      <a href="#use">How to use it</a>
-      <a href="#used-by">Used by</a>
+      <a href="#use">How</a>
+      <a href="#used-by">Examples</a>
       <a href="#layouts">Layouts</a>
-      <a href="#themes">Themes</a>
       <a href="https://github.com/YauhenBichel/readme-contributors">Source</a>
     </nav>
   </header>
   <main>
+    <h2 id="what">What</h2>
+    <div class="explain">
+      <p>
+        A GitHub Action that fills a README with the people who committed.
+        Each person is a polaroid: face, name, a bit of tilt. Each card is
+        its own link. Bots are omitted. No table. No third-party list service.
+      </p>
+    </div>
+
+    <h2 id="why">Why</h2>
+    <div class="explain">
+      <p>
+        GitHub cannot click a face inside one SVG. One picture is one link.
+        A wall.svg with six heads looks clickable. It is not. This Action
+        writes one card per person. Tap it, you land on their GitHub.
+      </p>
+    </div>
+
+    <h2 id="demo">Video</h2>
+    <div class="demo">
+      <video
+        controls
+        playsinline
+        preload="metadata"
+        poster="./media/demo-poster.png"
+        src="./media/readme-contributors-demo.mp4"
+        width="920"
+      >
+        18 second demo of the polaroid wall.
+        <a href="./media/readme-contributors-demo.mp4">Download the MP4</a>
+      </video>
+    </div>
+    <p class="note">
+      Same wall as the live cards below. 18 seconds. No voiceover.
+    </p>
+
     <div class="hero" id="live">
       <div class="live">
         <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src="./faces/YauhenBichel.svg" width="110" alt="Yauhen Bichel" /></a>
@@ -135,12 +179,24 @@
         <strong>readme-contributors</strong>
         <span>This Action, dogfooded on its own README.</span>
       </a>
+      <a href="https://github.com/MoleCare/molecare-mcp">
+        <strong>molecare-mcp</strong>
+        <span>Different six people. Open source. Not a medical device.</span>
+      </a>
+      <a href="https://github.com/MoleCare/molecare-skin-llm">
+        <strong>molecare-skin-llm</strong>
+        <span>Three polaroids on the README.</span>
+      </a>
+      <a href="https://github.com/MoleCare/molecare-ml">
+        <strong>molecare-ml</strong>
+        <span>Solo wall from the same Action.</span>
+      </a>
     </div>
     <p class="note">
       <a href="https://github.com/search?q=YauhenBichel%2Freadme-contributors%40+path%3A.github%2Fworkflows&amp;type=code">Search every public workflow</a>
       that pins <code>YauhenBichel/readme-contributors@</code>.
-      MoleCare and other public repos have open adoption pull requests;
-      they show up in that search after merge.
+      Also live:
+      <a href="https://github.com/MoleCare/molecare-desktop">molecare-desktop</a>.
     </p>
 
     <h2 id="use">How to use it</h2>

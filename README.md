@@ -13,21 +13,61 @@ orbit, honeycomb, and more). It reads the GitHub contributors API,
 omits bots, and replaces a pair of HTML markers. No `<table>`, so
 GitHub does not draw a grid. No third-party list service.
 
-Examples and copy-paste workflows:
-[yauhenbichel.github.io/readme-contributors](https://yauhenbichel.github.io/readme-contributors/).
+## What
 
-Any public repository can pin the
-[v1.5.0 release](https://github.com/YauhenBichel/readme-contributors/releases/tag/v1.5.0):
+A **GitHub Action** that fills a README with the people who actually
+committed. Each person is a **polaroid**: face, name, a bit of tilt.
+Each card is its own link. Bots are omitted. No `<table>`. No
+third-party list service.
 
-```yaml
-- uses: YauhenBichel/readme-contributors@v1.5.0
-  with:
-    token: ${{ secrets.GITHUB_TOKEN }}
+Watch the 18s demo (plays on the Pages site):
+
+[![18s demo: polaroid wall in real READMEs](./docs/media/demo-poster.png)](https://yauhenbichel.github.io/readme-contributors/#demo)
+
+## Why
+
+GitHub cannot click a face inside one SVG. One picture is one link.
+A `wall.svg` with six heads looks clickable. It is not.
+
+This Action writes one card per person. Tap it, you land on their
+GitHub profile.
+
+## How
+
+1. Put markers in `README.md`:
+
+```markdown
+<!-- readme: contributors,bots/- -start -->
+<!-- readme: contributors,bots/- -end -->
 ```
 
-GitHub draws a border on every README `<table>`, and a single SVG
-image cannot be clicked per face. This Action writes one tilted
-polaroid per person. Tap a card to open that GitHub profile.
+2. Call the Action. Pin the tag to read. Pin the SHA if the job can write:
+
+```yaml
+- uses: YauhenBichel/readme-contributors@dd5eb5b4251b0158662457256ca29c0de1e5444c # v1.5.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    format: html
+```
+
+3. Commit the rewritten README and `.github/faces`.
+
+A full copy-paste job is in
+[examples/contributors.yml](./examples/contributors.yml).
+The Pages how-to is
+[yauhenbichel.github.io/readme-contributors](https://yauhenbichel.github.io/readme-contributors/#use).
+
+## Examples
+
+- Live tap-the-cards wall:
+  [yauhenbichel.github.io/readme-contributors/#live](https://yauhenbichel.github.io/readme-contributors/#live)
+- [YauhenBichel/py-harness](https://github.com/YauhenBichel/py-harness) — 6 people, this demo wall
+- [MoleCare/molecare-mcp](https://github.com/MoleCare/molecare-mcp) — different 6 people
+- [MoleCare/molecare-skin-llm](https://github.com/MoleCare/molecare-skin-llm)
+- [MoleCare/molecare-ml](https://github.com/MoleCare/molecare-ml)
+- [MoleCare/molecare-desktop](https://github.com/MoleCare/molecare-desktop)
+
+MoleCare repos are open source. Not a medical device.
 
 ## Live demo
 
@@ -60,10 +100,12 @@ source of truth.
 - [YauhenBichel/py-harness](https://github.com/YauhenBichel/py-harness) — everyday laptop harness. The live demo above is its wall.
 - [YauhenBichel/merge-cheer](https://github.com/YauhenBichel/merge-cheer) — merge-celebration Action.
 - [YauhenBichel/readme-contributors](https://github.com/YauhenBichel/readme-contributors) — this repository (dogfood).
+- [MoleCare/molecare-mcp](https://github.com/MoleCare/molecare-mcp)
+- [MoleCare/molecare-skin-llm](https://github.com/MoleCare/molecare-skin-llm)
+- [MoleCare/molecare-ml](https://github.com/MoleCare/molecare-ml)
+- [MoleCare/molecare-desktop](https://github.com/MoleCare/molecare-desktop)
 
 [Search every public workflow that pins it](https://github.com/search?q=YauhenBichel%2Freadme-contributors%40+path%3A.github%2Fworkflows&type=code).
-
-[MoleCare](https://github.com/MoleCare) (`molecare-mcp`, `molecare-skin-llm`, `molecare-desktop`, `molecare-ml`) and other public repos have open adoption pull requests. They appear in the search above once those PRs merge.
 
 ## Layouts
 
