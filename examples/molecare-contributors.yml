@@ -1,0 +1,45 @@
+# Drop-in replacement for MoleCare repos that already run fill_contributors.py.
+# Swap the fill step and add the SVG to `git add`.
+
+name: Contributors
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: contributors-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  readme:
+    if: >-
+      github.actor != 'github-actions[bot]'
+      && (github.event_name != 'pull_request'
+          || github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
+          persist-credentials: true
+
+      - uses: YauhenBichel/readme-contributors@dde1d84bb305e531a8f923263791b0767a6bdd7c # v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push the list on a writable branch
+        if: >-
+          github.event.repository.default_branch != (github.head_ref || github.ref_name)
+          && (github.event_name != 'pull_request'
+              || github.event.pull_request.head.repo.full_name == github.repository)
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add README.md .github/contributors.svg
+          git diff --cached --quiet && exit 0
+          git commit -m "docs: refresh README contributors"
+          git push

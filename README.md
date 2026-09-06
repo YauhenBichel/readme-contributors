@@ -13,8 +13,25 @@ use a table. The default is a self-contained SVG facepile (circular
 avatars, light and dark rings) plus a linked name row so each person
 stays clickable.
 
-Used by [py-harness](https://github.com/YauhenBichel/py-harness). Issues
-and pull requests belong **here**.
+## Live demo
+
+This wall is produced by **this Action**, live, from the
+[py-harness](https://github.com/YauhenBichel/py-harness) contributors
+API (bots omitted). It refreshes on a schedule. That is the picture
+other repositories get.
+
+<!-- demo: live -start -->
+<p align="center">
+  <img src="./docs/demo.svg" width="310" alt="Yauhen Bichel, Mark Xian, Itzsaurav, svkzn, Aditya, Huangshuo Kuang" />
+</p>
+<p align="center">
+  <a href="https://github.com/YauhenBichel">Yauhen Bichel</a><span> · </span><a href="https://github.com/xianjianlf2">Mark Xian</a><span> · </span><a href="https://github.com/ItzSaurav">Itzsaurav</a><span> · </span><a href="https://github.com/svkzn">svkzn</a><span> · </span><a href="https://github.com/Aditya-233">Aditya</a><span> · </span><a href="https://github.com/kkkhs">Huangshuo Kuang</a>
+</p>
+<!-- demo: live -end -->
+
+Used by [py-harness](https://github.com/YauhenBichel/py-harness) and
+[MoleCare](https://github.com/MoleCare). Issues and pull requests
+belong **here**.
 
 ## Use it
 
@@ -26,6 +43,12 @@ Add markers to your README:
 Thank you to everyone who has helped.
 
 <!-- readme: contributors,bots/- -start -->
+<p align="center">
+  <img src=".github/contributors.svg" width="80" alt="Yauhen Bichel" />
+</p>
+<p align="center">
+  <a href="https://github.com/YauhenBichel">Yauhen Bichel</a>
+</p>
 <!-- readme: contributors,bots/- -end -->
 ```
 
@@ -60,6 +83,8 @@ jobs:
           git push
 ```
 
+A copy-paste workflow that opens a pull request on a protected default
+branch is in [examples/contributors.yml](./examples/contributors.yml).
 The Action only writes files in the workspace. Your workflow decides
 whether to commit them.
 
@@ -107,3 +132,18 @@ GITHUB_REPOSITORY=owner/name GITHUB_TOKEN="$GITHUB_TOKEN" \
 ```
 
 Set `CHECK=true` for the `check` input.
+
+## Contributors
+
+Thank you to everyone who has helped this Action.
+
+<!-- readme: contributors,bots/- -start -->
+<p align="center">
+  <img src="./.github/contributors.svg" width="80" alt="Yauhen Bichel" />
+</p>
+<p align="center">
+  <a href="https://github.com/YauhenBichel">Yauhen Bichel</a>
+</p>
+<!-- readme: contributors,bots/- -end -->
+
+Filled from GitHub commits (bots omitted).

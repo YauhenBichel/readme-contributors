@@ -1,0 +1,7 @@
+# The two lines a repo that already has a Contributors job should swap in.
+#
+#   - uses: YauhenBichel/readme-contributors@dde1d84bb305e531a8f923263791b0767a6bdd7c # v1
+#     with:
+#       token: ${{ secrets.GITHUB_TOKEN }}
+#
+# And `git add README.md .github/contributors.svg`

@@ -30,6 +30,13 @@ class FillTest(unittest.TestCase):
         self.assertIn("using: composite", text)
         self.assertIn("fill.py", text)
 
+    def test_readme_has_a_live_demo(self) -> None:
+        text = (ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn("<!-- demo: live -start -->", text)
+        self.assertIn("docs/demo.svg", text)
+        self.assertTrue((ROOT / "docs" / "demo.svg").is_file())
+        self.assertIn("<svg", (ROOT / "docs" / "demo.svg").read_text(encoding="utf-8"))
+
     def test_svg_facepile_clips_to_a_circle(self) -> None:
         svg = self.mod.render_svg(
             [
