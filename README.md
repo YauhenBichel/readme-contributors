@@ -26,8 +26,8 @@ Any public repository can pin the
 
 GitHub draws a border on every README `<table>`. This Action does not
 use a table. The default is a self-contained SVG facepile (circular
-avatars, light and dark rings) plus a linked name row so each person
-stays clickable.
+avatars, light and dark rings). Every icon and every name links to
+that person's GitHub profile.
 
 ## Live demo
 
@@ -38,7 +38,12 @@ other repositories get.
 
 <!-- demo: live -start -->
 <p align="center">
-  <img src="./docs/demo.svg" width="310" alt="Yauhen Bichel, Mark Xian, Itzsaurav, svkzn, Aditya, Huangshuo Kuang" />
+  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src="https://avatars.githubusercontent.com/YauhenBichel?s=144" width="72" height="72" alt="Yauhen Bichel" /></a>
+  <a href="https://github.com/xianjianlf2" title="Mark Xian"><img src="https://avatars.githubusercontent.com/xianjianlf2?s=144" width="72" height="72" alt="Mark Xian" /></a>
+  <a href="https://github.com/ItzSaurav" title="Itzsaurav"><img src="https://avatars.githubusercontent.com/ItzSaurav?s=144" width="72" height="72" alt="Itzsaurav" /></a>
+  <a href="https://github.com/svkzn" title="svkzn"><img src="https://avatars.githubusercontent.com/svkzn?s=144" width="72" height="72" alt="svkzn" /></a>
+  <a href="https://github.com/Aditya-233" title="Aditya"><img src="https://avatars.githubusercontent.com/Aditya-233?s=144" width="72" height="72" alt="Aditya" /></a>
+  <a href="https://github.com/kkkhs" title="Huangshuo Kuang"><img src="https://avatars.githubusercontent.com/kkkhs?s=144" width="72" height="72" alt="Huangshuo Kuang" /></a>
 </p>
 <p align="center">
   <a href="https://github.com/YauhenBichel">Yauhen Bichel</a><span> · </span><a href="https://github.com/xianjianlf2">Mark Xian</a><span> · </span><a href="https://github.com/ItzSaurav">Itzsaurav</a><span> · </span><a href="https://github.com/svkzn">svkzn</a><span> · </span><a href="https://github.com/Aditya-233">Aditya</a><span> · </span><a href="https://github.com/kkkhs">Huangshuo Kuang</a>
@@ -173,7 +178,7 @@ Thank you to everyone who has helped.
 
 <!-- readme: contributors,bots/- -start -->
 <p align="center">
-  <img src=".github/contributors.svg" width="80" alt="Yauhen Bichel" />
+  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src="https://avatars.githubusercontent.com/YauhenBichel?s=144" width="72" height="72" alt="Yauhen Bichel" /></a>
 </p>
 <p align="center">
   <a href="https://github.com/YauhenBichel">Yauhen Bichel</a>
@@ -239,7 +244,7 @@ No token, no GPU, no extra packages. `fill.py` is stdlib only.
 | --- | --- | --- |
 | `readme` | `README.md` | File that holds the markers |
 | `svg` | `.github/contributors.svg` | Generated wall (when `format` is `svg`) |
-| `format` | `svg` | `svg` for a drawn wall, `html` for linked avatars only |
+| `format` | `svg` | README icons always link to profiles; `html` skips the SVG file |
 | `layout` | `facepile` | `facepile`, `grid`, `tiles`, `list`, `compact`, `wave`, `orbit`, `honeycomb`, `ribbon`, `constellation`, `banner` |
 | `theme` | `auto` | `auto`, `github`, `midnight`, `sunrise`, `forest`, `ocean`, `mono` |
 | `columns` | `8` | Faces per row |
@@ -272,7 +277,7 @@ Thank you to everyone who has helped this Action.
 
 <!-- readme: contributors,bots/- -start -->
 <p align="center">
-  <img src="./.github/contributors.svg" width="80" alt="Yauhen Bichel" />
+  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src="https://avatars.githubusercontent.com/YauhenBichel?s=144" width="72" height="72" alt="Yauhen Bichel" /></a>
 </p>
 <p align="center">
   <a href="https://github.com/YauhenBichel">Yauhen Bichel</a>
