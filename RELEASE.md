@@ -1,10 +1,10 @@
 # Release and Marketplace
 
+Listing: https://github.com/marketplace/actions/readme-contributors
+
 1. Merge to `main`.
 2. Actions → **Release** → version `MAJOR.MINOR.PATCH` (no leading `v`).
-   Optional: `draft=true` for the first Marketplace tick before publish.
-3. Open the printed edit URL and tick **Publish this Action to the GitHub Marketplace**
-   (browser + 2FA; no API). First listing only.
+3. Later releases update the existing Marketplace listing automatically.
+   To re-open the form: `releases/edit/<tag>?marketplace=true` (browser + 2FA; no API).
 
-Current: [v1.5.0](https://github.com/YauhenBichel/readme-contributors/releases/tag/v1.5.0)  
-Edit: https://github.com/YauhenBichel/readme-contributors/releases/edit/v1.5.0
+Current: [v1.5.1](https://github.com/YauhenBichel/readme-contributors/releases/tag/v1.5.1)
