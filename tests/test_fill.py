@@ -36,6 +36,22 @@ class FillTest(unittest.TestCase):
         self.assertIn("docs/demo.svg", text)
         self.assertTrue((ROOT / "docs" / "demo.svg").is_file())
         self.assertIn("<svg", (ROOT / "docs" / "demo.svg").read_text(encoding="utf-8"))
+        self.assertIn("layout: tiles", text)
+        self.assertIn("theme: midnight", text)
+        for name in (
+            "layout-grid.svg",
+            "layout-tiles.svg",
+            "layout-list.svg",
+            "layout-compact.svg",
+            "theme-midnight.svg",
+            "theme-sunrise.svg",
+            "theme-forest.svg",
+            "theme-ocean.svg",
+            "theme-mono.svg",
+        ):
+            path = ROOT / "docs" / name
+            self.assertTrue(path.is_file(), name)
+            self.assertIn("<svg", path.read_text(encoding="utf-8"))
 
     def test_svg_facepile_clips_to_a_circle(self) -> None:
         svg = self.mod.render_svg(
@@ -54,6 +70,60 @@ class FillTest(unittest.TestCase):
         people = [{"login": f"u{i}", "name": f"User {i}"} for i in range(9)]
         svg = self.mod.render_svg(people, size=72, columns=8)
         self.assertIn('height="166"', svg)
+
+    def test_grid_does_not_overlap_faces(self) -> None:
+        people = [{"login": "alice", "name": "Alice"}, {"login": "bob", "name": "Bob"}]
+        svg = self.mod.render_svg(people, layout="grid", size=72, columns=8)
+        self.assertIn('cx="44.0"', svg)
+        self.assertIn('cx="128.0"', svg)
+        self.assertNotIn("<table>", svg)
+
+    def test_tiles_use_rounded_rects(self) -> None:
+        svg = self.mod.render_svg(
+            [{"login": "alice", "name": "Alice"}],
+            layout="tiles",
+        )
+        self.assertIn("<rect", svg)
+        self.assertIn('rx="', svg)
+
+    def test_list_writes_the_name_beside_the_face(self) -> None:
+        svg = self.mod.render_svg(
+            [{"login": "alice", "name": "Alice Example"}],
+            layout="list",
+        )
+        self.assertIn("Alice Example", svg)
+        self.assertIn("@alice", svg)
+
+    def test_compact_is_tighter_than_grid(self) -> None:
+        people = [{"login": f"u{i}", "name": f"User {i}"} for i in range(4)]
+        grid = self.mod.svg_width(people, 72, 8, layout="grid")
+        compact = self.mod.svg_width(people, 72, 8, layout="compact")
+        self.assertLess(compact, grid)
+
+    def test_midnight_theme_paints_a_dark_frame(self) -> None:
+        svg = self.mod.render_svg(
+            [{"login": "alice", "name": "Alice"}],
+            theme="midnight",
+        )
+        self.assertIn("#0d1117", svg)
+        self.assertIn("#e6edf3", svg)
+
+    def test_unknown_layout_is_a_refusal(self) -> None:
+        with self.assertRaises(SystemExit) as raised:
+            self.mod.parse_layout("carousel")
+        self.assertIn("facepile", str(raised.exception))
+
+    def test_unknown_theme_is_a_refusal(self) -> None:
+        with self.assertRaises(SystemExit) as raised:
+            self.mod.parse_theme("neon")
+        self.assertIn("midnight", str(raised.exception))
+
+    def test_action_manifest_exposes_layout_and_theme(self) -> None:
+        text = (ROOT / "action.yml").read_text(encoding="utf-8")
+        self.assertIn("layout:", text)
+        self.assertIn("theme:", text)
+        self.assertIn("LAYOUT:", text)
+        self.assertIn("THEME:", text)
 
     def test_html_mode_has_no_table(self) -> None:
         html = self.mod.render_wall(

@@ -15,8 +15,17 @@ inputs:
     description: Where to write the generated SVG wall (format=svg)
     default: .github/contributors.svg
   format:
-    description: svg (circular wall) or html (linked avatars, no extra file)
+    description: svg (drawn wall) or html (linked avatars, no extra file)
     default: svg
+  layout:
+    description: >
+      Wall layout. One of facepile (default), grid, tiles, list, compact.
+    default: facepile
+  theme:
+    description: >
+      Color theme. One of auto (default), github, midnight, sunrise,
+      forest, ocean, mono.
+    default: auto
   columns:
     description: Faces per row
     default: "8"
@@ -61,6 +70,8 @@ runs:
         README_PATH: ${{ inputs.readme }}
         SVG_PATH: ${{ inputs.svg }}
         FORMAT: ${{ inputs.format }}
+        LAYOUT: ${{ inputs.layout }}
+        THEME: ${{ inputs.theme }}
         COLUMNS: ${{ inputs.columns }}
         AVATAR_SIZE: ${{ inputs.avatar-size }}
         MAX_PEOPLE: ${{ inputs.max }}

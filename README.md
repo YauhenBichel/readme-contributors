@@ -6,7 +6,14 @@
 
 A composite GitHub Action that fills a circular-avatar contributors wall
 into a README. It reads the GitHub contributors API, omits bots, and
-replaces a pair of HTML markers.
+replaces a pair of HTML markers. Any public repository can use the
+[v1.2.0 release](https://github.com/YauhenBichel/readme-contributors/releases/tag/v1.2.0):
+
+```yaml
+- uses: YauhenBichel/readme-contributors@v1.2.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+```
 
 GitHub draws a border on every README `<table>`. This Action does not
 use a table. The default is a self-contained SVG facepile (circular
@@ -32,6 +39,69 @@ other repositories get.
 Used by [py-harness](https://github.com/YauhenBichel/py-harness) and
 [MoleCare](https://github.com/MoleCare). Issues and pull requests
 belong **here**.
+
+## Layouts
+
+Set `layout`. The default stays the overlapping facepile.
+
+**grid** — spaced circles, one row until `columns`.
+
+<p align="center">
+  <img src="./docs/layout-grid.svg" width="460" alt="grid layout" />
+</p>
+
+**tiles** — rounded squares.
+
+<p align="center">
+  <img src="./docs/layout-tiles.svg" width="474" alt="tiles layout" />
+</p>
+
+**list** — avatar, name, and login on each row.
+
+<p align="center">
+  <img src="./docs/layout-list.svg" width="270" alt="list layout" />
+</p>
+
+**compact** — a tighter grid for a long list.
+
+<p align="center">
+  <img src="./docs/layout-compact.svg" width="378" alt="compact layout" />
+</p>
+
+```yaml
+- uses: YauhenBichel/readme-contributors@v1.2.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    layout: tiles
+```
+
+## Themes
+
+Set `theme`. `auto` follows the reader's light or dark README. The
+others paint a frame so the wall stays the same in both.
+
+<p align="center">
+  <img src="./docs/theme-midnight.svg" width="284" alt="midnight theme" />
+  <img src="./docs/theme-sunrise.svg" width="284" alt="sunrise theme" />
+</p>
+<p align="center">
+  <img src="./docs/theme-forest.svg" width="284" alt="forest theme" />
+  <img src="./docs/theme-ocean.svg" width="284" alt="ocean theme" />
+</p>
+<p align="center">
+  <img src="./docs/theme-mono.svg" width="284" alt="mono theme" />
+</p>
+
+```yaml
+- uses: YauhenBichel/readme-contributors@v1.2.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    layout: facepile
+    theme: midnight
+```
+
+`theme` accepts `auto`, `github`, `midnight`, `sunrise`, `forest`,
+`ocean`, or `mono`.
 
 ## Use it
 
@@ -71,9 +141,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: YauhenBichel/readme-contributors@v1
+      - uses: YauhenBichel/readme-contributors@v1.2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          # layout: tiles
+          # theme: midnight
       - run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
@@ -108,7 +180,9 @@ No token, no GPU, no extra packages. `fill.py` is stdlib only.
 | --- | --- | --- |
 | `readme` | `README.md` | File that holds the markers |
 | `svg` | `.github/contributors.svg` | Generated wall (when `format` is `svg`) |
-| `format` | `svg` | `svg` for the circular wall, `html` for linked avatars only |
+| `format` | `svg` | `svg` for a drawn wall, `html` for linked avatars only |
+| `layout` | `facepile` | `facepile`, `grid`, `tiles`, `list`, or `compact` |
+| `theme` | `auto` | `auto`, `github`, `midnight`, `sunrise`, `forest`, `ocean`, `mono` |
 | `columns` | `8` | Faces per row |
 | `avatar-size` | `72` | Face diameter, pixels |
 | `max` | `48` | Cap after bots are omitted |

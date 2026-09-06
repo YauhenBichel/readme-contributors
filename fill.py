@@ -3,7 +3,8 @@
 
 Bots are omitted. The default drawing is a circular facepile SVG so the
 README does not pick up GitHub's table borders. A linked name row under
-the picture keeps every person clickable.
+the picture keeps every person clickable. Layouts and themes change the
+drawing; they do not change who is listed.
 """
 
 from __future__ import annotations
@@ -26,6 +27,62 @@ TINY_PNG = bytes.fromhex(
     "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489"
     "0000000a49444154789c63000100000500010d0a2db40000000049454e44ae426082"
 )
+LAYOUTS = ("facepile", "grid", "tiles", "list", "compact")
+THEMES = {
+    "auto": {
+        "ring": "#ffffff",
+        "ring_dark": "#0d1117",
+        "label": "#24292f",
+        "label_dark": "#e6edf3",
+        "bg": "",
+        "card": "",
+        "muted": "#57606a",
+    },
+    "github": {
+        "ring": "#ffffff",
+        "ring_dark": "#0d1117",
+        "label": "#1f2328",
+        "label_dark": "#e6edf3",
+        "bg": "",
+        "card": "",
+        "muted": "#656d76",
+    },
+    "midnight": {
+        "ring": "#30363d",
+        "label": "#e6edf3",
+        "bg": "#0d1117",
+        "card": "#161b22",
+        "muted": "#8b949e",
+    },
+    "sunrise": {
+        "ring": "#fff7ed",
+        "label": "#7c2d12",
+        "bg": "#fff7ed",
+        "card": "#ffedd5",
+        "muted": "#c2410c",
+    },
+    "forest": {
+        "ring": "#ecfdf3",
+        "label": "#14532d",
+        "bg": "#f0fdf4",
+        "card": "#dcfce7",
+        "muted": "#15803d",
+    },
+    "ocean": {
+        "ring": "#e0f2fe",
+        "label": "#0c4a6e",
+        "bg": "#f0f9ff",
+        "card": "#e0f2fe",
+        "muted": "#0369a1",
+    },
+    "mono": {
+        "ring": "#f6f8fa",
+        "label": "#1f2328",
+        "bg": "#f6f8fa",
+        "card": "#eaeef2",
+        "muted": "#59636e",
+    },
+}
 
 
 def _root() -> Path:
@@ -147,83 +204,262 @@ def _data_uri(payload: bytes) -> str:
     return f"data:{_mime(payload)};base64,{encoded}"
 
 
+def parse_layout(raw: str) -> str:
+    name = (raw or "facepile").strip().lower() or "facepile"
+    if name not in LAYOUTS:
+        allowed = ", ".join(LAYOUTS)
+        raise SystemExit(f"layout must be one of: {allowed}")
+    return name
+
+
+def parse_theme(raw: str) -> str:
+    name = (raw or "auto").strip().lower() or "auto"
+    if name not in THEMES:
+        allowed = ", ".join(THEMES)
+        raise SystemExit(f"theme must be one of: {allowed}")
+    return name
+
+
+def _font() -> str:
+    return (
+        "-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, "
+        "sans-serif"
+    )
+
+
+def _theme_css(theme: Mapping[str, str]) -> list[str]:
+    lines = [
+        "<style>",
+        f".ring {{ fill: none; stroke: {theme['ring']}; stroke-width: 4; }}",
+        f".label {{ fill: {theme['label']}; font-family: {_font()}; "
+        "font-weight: 600; }",
+        f".muted {{ fill: {theme['muted']}; font-family: {_font()}; }}",
+    ]
+    if theme.get("ring_dark"):
+        lines.extend(
+            [
+                "@media (prefers-color-scheme: dark) {",
+                f"  .ring {{ stroke: {theme['ring_dark']}; }}",
+                f"  .label {{ fill: {theme.get('label_dark', theme['label'])}; }}",
+                "}",
+            ]
+        )
+    lines.append("</style>")
+    return lines
+
+
+def _metrics(
+    layout: str,
+    size: int,
+    columns: int,
+    count: int,
+    *,
+    framed: bool,
+) -> dict[str, int]:
+    columns = max(1, columns)
+    size = max(32, size)
+    if layout == "facepile":
+        pad = 10 if framed else 4
+        step = int(size * 0.64)
+        row_gap = 14
+        name_w = 0
+    elif layout == "compact":
+        pad = 10 if framed else 6
+        step = size + 6
+        row_gap = 6
+        name_w = 0
+    elif layout == "list":
+        columns = 1
+        pad = 14 if framed else 12
+        step = 1
+        row_gap = 10
+        name_w = 168
+    elif layout == "tiles":
+        pad = 14 if framed else 10
+        step = size + 14
+        row_gap = 14
+        name_w = 0
+    else:
+        pad = 12 if framed else 8
+        step = size + 12
+        row_gap = 12
+        name_w = 0
+    rows = (count + columns - 1) // columns if count else 1
+    widest = min(columns, count) if count else 1
+    if layout == "list":
+        width = pad * 2 + size + 14 + name_w
+        height = pad * 2 + size * count + row_gap * max(0, count - 1)
+    elif layout == "facepile":
+        width = pad * 2 + size + step * max(0, widest - 1)
+        height = pad * 2 + size * rows + row_gap * max(0, rows - 1)
+    else:
+        width = pad * 2 + step * max(0, widest - 1) + size
+        height = pad * 2 + (size + row_gap) * max(0, rows - 1) + size
+    return {
+        "columns": columns,
+        "size": size,
+        "pad": pad,
+        "step": step,
+        "row_gap": row_gap,
+        "rows": rows,
+        "widest": widest,
+        "width": max(1, width),
+        "height": max(1, height),
+        "name_w": name_w,
+    }
+
+
+def _paint_face(
+    defs: list[str],
+    body: list[str],
+    *,
+    index: int,
+    person: Mapping[str, str],
+    pictures: Mapping[str, bytes],
+    x: float,
+    y: float,
+    size: int,
+    shape: str,
+) -> None:
+    login = person["login"]
+    name = person["name"]
+    cx = x + size / 2
+    cy = y + size / 2
+    radius = size / 2
+    clip = f"c{index}"
+    if shape == "tile":
+        radius_x = size * 0.2
+        defs.append(
+            f'<clipPath id="{clip}">'
+            f'<rect x="{x:.1f}" y="{y:.1f}" width="{size}" height="{size}" '
+            f'rx="{radius_x:.1f}"/>'
+            "</clipPath>"
+        )
+    else:
+        defs.append(
+            f'<clipPath id="{clip}">'
+            f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{radius:.1f}"/>'
+            "</clipPath>"
+        )
+    payload = pictures.get(login)
+    if payload:
+        href = _data_uri(payload)
+        body.append(
+            f'<image href="{href}" x="{x:.1f}" y="{y:.1f}" '
+            f'width="{size}" height="{size}" '
+            f'clip-path="url(#{clip})" />'
+        )
+    else:
+        hue = _hue(login)
+        initials = _xml(_initials(name))
+        if shape == "tile":
+            body.append(
+                f'<rect x="{x:.1f}" y="{y:.1f}" width="{size}" height="{size}" '
+                f'rx="{size * 0.2:.1f}" fill="hsl({hue}, 42%, 46%)"/>'
+            )
+        else:
+            body.append(
+                f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{radius:.1f}" '
+                f'fill="hsl({hue}, 42%, 46%)"/>'
+            )
+        body.append(
+            f'<text x="{cx:.1f}" y="{cy + size * 0.12:.1f}" '
+            f'text-anchor="middle" fill="#ffffff" '
+            f'font-size="{size * 0.34:.0f}" '
+            f'font-family="{_font()}" '
+            f'font-weight="600">{initials}</text>'
+        )
+    if shape == "tile":
+        body.append(
+            f'<rect class="ring" x="{x:.1f}" y="{y:.1f}" width="{size}" '
+            f'height="{size}" rx="{size * 0.2:.1f}"/>'
+        )
+    else:
+        body.append(
+            f'<circle class="ring" cx="{cx:.1f}" cy="{cy:.1f}" '
+            f'r="{radius:.1f}"/>'
+        )
+
+
 def render_svg(
     people: list[dict[str, str]],
     avatars: Mapping[str, bytes] | None = None,
     *,
     size: int = 72,
     columns: int = 8,
+    layout: str = "facepile",
+    theme: str = "auto",
 ) -> str:
-    """Circular overlapping facepile. Names stay in the HTML row."""
+    """Draw the wall. Names stay in the HTML row so each face stays a link."""
+    layout = parse_layout(layout)
+    theme_name = parse_theme(theme)
+    palette = THEMES[theme_name]
     if not people:
         return (
             '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1">'
             "</svg>\n"
         )
     pictures = avatars or {}
-    columns = max(1, columns)
-    size = max(32, size)
-    step = int(size * 0.64)
-    pad = 4
-    row_gap = 14
-    rows = (len(people) + columns - 1) // columns
-    widest = min(columns, len(people))
-    width = pad * 2 + size + step * (widest - 1)
-    height = pad * 2 + size * rows + row_gap * (rows - 1)
+    framed = bool(palette.get("bg"))
+    metrics = _metrics(layout, size, columns, len(people), framed=framed)
+    size = metrics["size"]
+    columns = metrics["columns"]
+    pad = metrics["pad"]
+    step = metrics["step"]
+    row_gap = metrics["row_gap"]
+    width = metrics["width"]
+    height = metrics["height"]
     names = ", ".join(person["name"] for person in people)
-    defs: list[str] = [
-        "<style>",
-        ".ring { fill: none; stroke: #ffffff; stroke-width: 4; }",
-        "@media (prefers-color-scheme: dark) {",
-        "  .ring { stroke: #0d1117; }",
-        "}",
-        "</style>",
-    ]
+    defs: list[str] = _theme_css(palette)
     body: list[str] = []
-    # Draw right-to-left so the first contributor sits on top.
-    for index, person in reversed(list(enumerate(people))):
-        login = person["login"]
-        name = person["name"]
-        column = index % columns
-        row = index // columns
-        x = pad + column * step
-        y = pad + row * (size + row_gap)
-        cx = x + size / 2
-        cy = y + size / 2
-        radius = size / 2
-        clip = f"c{index}"
-        defs.append(
-            f'<clipPath id="{clip}">'
-            f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{radius:.1f}"/>'
-            "</clipPath>"
-        )
-        payload = pictures.get(login)
-        if payload:
-            href = _data_uri(payload)
-            body.append(
-                f'<image href="{href}" x="{x}" y="{y}" '
-                f'width="{size}" height="{size}" '
-                f'clip-path="url(#{clip})" />'
-            )
-        else:
-            hue = _hue(login)
-            initials = _xml(_initials(name))
-            body.append(
-                f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{radius:.1f}" '
-                f'fill="hsl({hue}, 42%, 46%)"/>'
-            )
-            body.append(
-                f'<text x="{cx:.1f}" y="{cy + size * 0.12:.1f}" '
-                f'text-anchor="middle" fill="#ffffff" '
-                f'font-size="{size * 0.34:.0f}" '
-                'font-family="-apple-system, BlinkMacSystemFont, '
-                'Segoe UI, Helvetica, Arial, sans-serif" '
-                f'font-weight="600">{initials}</text>'
-            )
+    if palette.get("bg"):
         body.append(
-            f'<circle class="ring" cx="{cx:.1f}" cy="{cy:.1f}" '
-            f'r="{radius:.1f}"/>'
+            f'<rect width="{width}" height="{height}" rx="16" '
+            f'fill="{palette["bg"]}"/>'
         )
+    shape = "tile" if layout == "tiles" else "circle"
+    order = (
+        reversed(list(enumerate(people)))
+        if layout == "facepile"
+        else enumerate(people)
+    )
+    for index, person in order:
+        if layout == "list":
+            x = float(pad)
+            y = float(pad + index * (size + row_gap))
+        else:
+            column = index % columns
+            row = index // columns
+            x = float(pad + column * step)
+            y = float(pad + row * (size + row_gap))
+        if layout == "list" and palette.get("card"):
+            body.append(
+                f'<rect x="{pad - 4:.1f}" y="{y - 4:.1f}" '
+                f'width="{width - pad * 2 + 8}" height="{size + 8}" '
+                f'rx="12" fill="{palette["card"]}"/>'
+            )
+        _paint_face(
+            defs,
+            body,
+            index=index,
+            person=person,
+            pictures=pictures,
+            x=x,
+            y=y,
+            size=size,
+            shape=shape,
+        )
+        if layout == "list":
+            login = _xml(person["login"])
+            label = _xml(person["name"])
+            body.append(
+                f'<text class="label" x="{x + size + 14:.1f}" '
+                f'y="{y + size * 0.42:.1f}" font-size="15">{label}</text>'
+            )
+            body.append(
+                f'<text class="muted" x="{x + size + 14:.1f}" '
+                f'y="{y + size * 0.72:.1f}" font-size="12">@{login}</text>'
+            )
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" '
         f'height="{height}" role="img" aria-label="{_xml(names)}">\n'
@@ -289,13 +525,19 @@ def render_wall(
     return picture + names
 
 
-def svg_width(people: list[dict[str, str]], size: int, columns: int) -> int:
+def svg_width(
+    people: list[dict[str, str]],
+    size: int,
+    columns: int,
+    layout: str = "facepile",
+    theme: str = "auto",
+) -> int:
     if not people:
         return 1
-    columns = max(1, columns)
-    step = int(max(32, size) * 0.64)
-    widest = min(columns, len(people))
-    return 8 + max(32, size) + step * (widest - 1)
+    layout = parse_layout(layout)
+    theme_name = parse_theme(theme)
+    framed = bool(THEMES[theme_name].get("bg"))
+    return _metrics(layout, size, columns, len(people), framed=framed)["width"]
 
 
 def apply_readme(text: str, block: str) -> str:
@@ -333,6 +575,8 @@ def main() -> int:
     columns = _int_env("COLUMNS", 8)
     size = _int_env("AVATAR_SIZE", 72)
     limit = _int_env("MAX_PEOPLE", 48)
+    layout = parse_layout(os.environ.get("LAYOUT", "facepile"))
+    theme = parse_theme(os.environ.get("THEME", "auto"))
     check = os.environ.get("CHECK", "").strip().lower() in {"1", "true", "yes"}
     if not repo:
         raise SystemExit("GITHUB_REPOSITORY is required (owner/name)")
@@ -343,11 +587,18 @@ def main() -> int:
     svg_text = ""
     if fmt == "svg":
         avatars = fetch_avatars(people, token, size)
-        svg_text = render_svg(people, avatars, size=size, columns=columns)
+        svg_text = render_svg(
+            people,
+            avatars,
+            size=size,
+            columns=columns,
+            layout=layout,
+            theme=theme,
+        )
         href = Path(os.path.relpath(svg_path, start=readme.parent)).as_posix()
         if not href.startswith("."):
             href = f"./{href}"
-        width = svg_width(people, size, columns)
+        width = svg_width(people, size, columns, layout=layout, theme=theme)
     block = render_wall(
         people,
         svg_href=href,
