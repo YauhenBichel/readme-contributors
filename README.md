@@ -13,6 +13,8 @@ orbit, honeycomb, and more). It reads the GitHub contributors API,
 omits bots, and replaces a pair of HTML markers. No `<table>`, so
 GitHub does not draw a grid. No third-party list service.
 
+[![18s demo](./docs/media/readme-contributors-demo.gif)](https://yauhenbichel.github.io/readme-contributors/#demo)
+
 ## What
 
 A **GitHub Action** that fills a README with the people who actually
@@ -20,9 +22,10 @@ committed. Each person is a **polaroid**: face, name, a bit of tilt.
 Each card is its own link. Bots are omitted. No `<table>`. No
 third-party list service.
 
-Watch the 18s demo (plays on the Pages site):
+Watch the 18s demo (GitHub README plays this as a GIF; the MP4 is on
+[Pages](https://yauhenbichel.github.io/readme-contributors/#demo)):
 
-[![18s demo: polaroid wall in real READMEs](./docs/media/demo-poster.png)](https://yauhenbichel.github.io/readme-contributors/#demo)
+[![18s demo: polaroid wall in real READMEs](./docs/media/readme-contributors-demo.gif)](https://yauhenbichel.github.io/readme-contributors/#demo)
 
 ## Why
 
