@@ -40,6 +40,10 @@ class FillTest(unittest.TestCase):
         self.assertIn("theme: midnight", text)
         self.assertIn("GitHub Action", text)
         self.assertIn("yauhenbichel.github.io/readme-contributors", text)
+        self.assertIn("## Used by", text)
+        self.assertIn("YauhenBichel/py-harness", text)
+        self.assertIn("YauhenBichel/merge-cheer", text)
+        self.assertIn("github.com/search?q=YauhenBichel%2Freadme-contributors", text)
         for name in (
             "layout-grid.svg",
             "layout-tiles.svg",

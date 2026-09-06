@@ -36,6 +36,15 @@
     .hero img { max-width: 100%; height: auto; }
     nav { display: flex; flex-wrap: wrap; gap: 14px 20px; margin: 20px 0 0; }
     nav a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+    .used { display: grid; gap: 12px; margin: 16px 0; }
+    @media (min-width: 720px) { .used { grid-template-columns: 1fr 1fr 1fr; } }
+    .used a {
+      display: block; background: var(--card); border: 1px solid var(--line);
+      border-radius: 14px; padding: 14px 16px; color: var(--ink);
+      text-decoration: none;
+    }
+    .used a strong { display: block; color: var(--accent-2); }
+    .used a span { color: var(--muted); font-size: 0.92rem; }
     .grid { display: grid; gap: 16px; }
     @media (min-width: 720px) { .grid.two { grid-template-columns: 1fr 1fr; } }
     article {
@@ -70,6 +79,7 @@
     </p>
     <nav>
       <a href="#use">How to use it</a>
+      <a href="#used-by">Used by</a>
       <a href="#layouts">Layouts</a>
       <a href="#themes">Themes</a>
       <a href="https://github.com/YauhenBichel/readme-contributors">Source</a>
@@ -80,6 +90,29 @@
       <img src="./demo.svg" width="310" alt="Live facepile from py-harness contributors" />
     </div>
     <p class="note">Live demo: the default <code>facepile</code>, drawn from the py-harness contributors API.</p>
+
+    <h2 id="used-by">Used by</h2>
+    <p>Public repositories that pin this Action on their default branch.</p>
+    <div class="used">
+      <a href="https://github.com/YauhenBichel/py-harness">
+        <strong>py-harness</strong>
+        <span>Everyday laptop harness. This live demo is its wall.</span>
+      </a>
+      <a href="https://github.com/YauhenBichel/merge-cheer">
+        <strong>merge-cheer</strong>
+        <span>Merge-celebration Action.</span>
+      </a>
+      <a href="https://github.com/YauhenBichel/readme-contributors">
+        <strong>readme-contributors</strong>
+        <span>This Action, dogfooded on its own README.</span>
+      </a>
+    </div>
+    <p class="note">
+      <a href="https://github.com/search?q=YauhenBichel%2Freadme-contributors%40+path%3A.github%2Fworkflows&amp;type=code">Search every public workflow</a>
+      that pins <code>YauhenBichel/readme-contributors@</code>.
+      MoleCare and other public repos have open adoption pull requests;
+      they show up in that search after merge.
+    </p>
 
     <h2 id="use">How to use it</h2>
     <ol>

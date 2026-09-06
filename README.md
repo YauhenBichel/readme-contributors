@@ -47,9 +47,21 @@ other repositories get.
 
 Examples for every layout live on the
 [GitHub Pages site](https://yauhenbichel.github.io/readme-contributors/).
-Used by [py-harness](https://github.com/YauhenBichel/py-harness) and
-[MoleCare](https://github.com/MoleCare). Issues and pull requests
-belong **here**.
+Issues and pull requests belong **here**.
+
+## Used by
+
+These public repositories pin this Action on their **default branch**.
+GitHub does not show a Used-by graph for Actions, so this list is the
+source of truth.
+
+- [YauhenBichel/py-harness](https://github.com/YauhenBichel/py-harness) — everyday laptop harness. The live demo above is its wall.
+- [YauhenBichel/merge-cheer](https://github.com/YauhenBichel/merge-cheer) — merge-celebration Action.
+- [YauhenBichel/readme-contributors](https://github.com/YauhenBichel/readme-contributors) — this repository (dogfood).
+
+[Search every public workflow that pins it](https://github.com/search?q=YauhenBichel%2Freadme-contributors%40+path%3A.github%2Fworkflows&type=code).
+
+[MoleCare](https://github.com/MoleCare) (`molecare-mcp`, `molecare-skin-llm`, `molecare-desktop`, `molecare-ml`) and other public repos have open adoption pull requests. They appear in the search above once those PRs merge.
 
 ## Layouts
 
