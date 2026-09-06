@@ -12,7 +12,7 @@ SITE = ROOT / "docs" / "index.html"
 class PagesTest(unittest.TestCase):
     def test_site_explains_how_to_use_the_action(self) -> None:
         text = SITE.read_text(encoding="utf-8")
-        self.assertIn("uses: YauhenBichel/readme-contributors@v1.5.0", text)
+        self.assertIn("uses: YauhenBichel/readme-contributors@v1.5.1", text)
         self.assertIn("&lt;!-- readme: contributors,bots/- -start --&gt;", text)
         self.assertIn("layout: stickers", text)
         self.assertIn("layout: orbit", text)
@@ -28,6 +28,7 @@ class PagesTest(unittest.TestCase):
         self.assertIn('href="https://github.com/YauhenBichel"', text)
         self.assertIn("github.com/YauhenBichel/py-harness", text)
         self.assertIn("github.com/YauhenBichel/merge-cheer", text)
+        self.assertIn("marketplace/actions/readme-contributors", text)
         self.assertIn("github.com/MoleCare/molecare-mcp", text)
         self.assertNotIn("/Users/", text)
         self.assertNotIn("DevBox", text)
