@@ -68,6 +68,7 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.token }}
         GITHUB_REPOSITORY: ${{ inputs.repository }}
+        CONTRIBUTORS_REPO: ${{ inputs.repository }}
         README_PATH: ${{ inputs.readme }}
         SVG_PATH: ${{ inputs.svg }}
         FORMAT: ${{ inputs.format }}
