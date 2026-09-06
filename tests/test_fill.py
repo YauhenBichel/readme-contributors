@@ -43,6 +43,12 @@ class FillTest(unittest.TestCase):
             "layout-tiles.svg",
             "layout-list.svg",
             "layout-compact.svg",
+            "layout-wave.svg",
+            "layout-orbit.svg",
+            "layout-honeycomb.svg",
+            "layout-ribbon.svg",
+            "layout-constellation.svg",
+            "layout-banner.svg",
             "theme-midnight.svg",
             "theme-sunrise.svg",
             "theme-forest.svg",
@@ -107,6 +113,46 @@ class FillTest(unittest.TestCase):
         )
         self.assertIn("#0d1117", svg)
         self.assertIn("#e6edf3", svg)
+
+    def test_wave_lifts_every_other_face(self) -> None:
+        people = [{"login": f"u{i}", "name": f"User {i}"} for i in range(4)]
+        svg = self.mod.render_svg(people, layout="wave", size=64, columns=8)
+        self.assertIn('cy="', svg)
+        first = svg.split('cy="', 1)[1].split('"', 1)[0]
+        second = svg.split('cy="', 2)[2].split('"', 1)[0]
+        self.assertNotEqual(first, second)
+
+    def test_orbit_puts_one_person_in_the_middle(self) -> None:
+        people = [{"login": f"u{i}", "name": f"User {i}"} for i in range(5)]
+        svg = self.mod.render_svg(people, layout="orbit", size=48)
+        self.assertIn('class="link"', svg)
+        self.assertIn('r="26.5"', svg)
+        self.assertIn('r="24.0"', svg)
+
+    def test_honeycomb_clips_to_a_hex(self) -> None:
+        svg = self.mod.render_svg(
+            [{"login": "alice", "name": "Alice"}],
+            layout="honeycomb",
+        )
+        self.assertIn("<polygon", svg)
+
+    def test_ribbon_staggers_the_row(self) -> None:
+        people = [{"login": "a", "name": "A"}, {"login": "b", "name": "B"}]
+        svg = self.mod.render_svg(people, layout="ribbon", size=50)
+        self.assertIn('cy="33.0"', svg)
+        self.assertIn('cy="51.0"', svg)
+
+    def test_constellation_draws_links(self) -> None:
+        people = [{"login": f"u{i}", "name": f"User {i}"} for i in range(3)]
+        svg = self.mod.render_svg(people, layout="constellation")
+        self.assertIn("<line", svg)
+        self.assertIn('class="link"', svg)
+
+    def test_banner_enlarges_the_first_person(self) -> None:
+        people = [{"login": "a", "name": "A"}, {"login": "b", "name": "B"}]
+        svg = self.mod.render_svg(people, layout="banner", size=40)
+        self.assertIn('r="31.0"', svg)
+        self.assertIn('r="20.0"', svg)
 
     def test_unknown_layout_is_a_refusal(self) -> None:
         with self.assertRaises(SystemExit) as raised:

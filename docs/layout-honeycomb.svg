@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="268" height="111" role="img" aria-label="Yauhen Bichel, Mark Xian, Itzsaurav, svkzn, Aditya, Huangshuo Kuang">
+<title>Yauhen Bichel, Mark Xian, Itzsaurav, svkzn, Aditya, Huangshuo Kuang</title>
+<defs>
+<style>
+.ring { fill: none; stroke: #ffffff; stroke-width: 4; }
+.label { fill: #24292f; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif; font-weight: 600; }
+.muted { fill: #57606a; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif; }
+.link { fill: none; stroke: #57606a; stroke-width: 1.5; stroke-opacity: 0.55; }
+@media (prefers-color-scheme: dark) {
+  .ring { stroke: #0d1117; }
+  .label { fill: #e6edf3; }
+}
+</style>
+<clipPath id="c0"><polygon points="52.8,44.0 32.0,56.0 11.2,44.0 11.2,20.0 32.0,8.0 52.8,20.0"/></clipPath>
+<clipPath id="c1"><polygon points="108.8,44.0 88.0,56.0 67.2,44.0 67.2,20.0 88.0,8.0 108.8,20.0"/></clipPath>
+<clipPath id="c2"><polygon points="164.8,44.0 144.0,56.0 123.2,44.0 123.2,20.0 144.0,8.0 164.8,20.0"/></clipPath>
+<clipPath id="c3"><polygon points="220.8,44.0 200.0,56.0 179.2,44.0 179.2,20.0 200.0,8.0 220.8,20.0"/></clipPath>
+<clipPath id="c4"><polygon points="80.8,91.0 60.0,103.0 39.2,91.0 39.2,67.0 60.0,55.0 80.8,67.0"/></clipPath>
+<clipPath id="c5"><polygon points="136.8,91.0 116.0,103.0 95.2,91.0 95.2,67.0 116.0,55.0 136.8,67.0"/></clipPath>
+</defs>
+<polygon points="52.8,44.0 32.0,56.0 11.2,44.0 11.2,20.0 32.0,8.0 52.8,20.0" fill="hsl(121, 42%, 46%)"/>
+<text x="32.0" y="37.8" text-anchor="middle" fill="#ffffff" font-size="16" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-weight="600">YB</text>
+<polygon class="ring" points="52.8,44.0 32.0,56.0 11.2,44.0 11.2,20.0 32.0,8.0 52.8,20.0"/>
+<polygon points="108.8,44.0 88.0,56.0 67.2,44.0 67.2,20.0 88.0,8.0 108.8,20.0" fill="hsl(30, 42%, 46%)"/>
+<text x="88.0" y="37.8" text-anchor="middle" fill="#ffffff" font-size="16" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-weight="600">MX</text>
+<polygon class="ring" points="108.8,44.0 88.0,56.0 67.2,44.0 67.2,20.0 88.0,8.0 108.8,20.0"/>
+<polygon points="164.8,44.0 144.0,56.0 123.2,44.0 123.2,20.0 144.0,8.0 164.8,20.0" fill="hsl(217, 42%, 46%)"/>
+<text x="144.0" y="37.8" text-anchor="middle" fill="#ffffff" font-size="16" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-weight="600">IT</text>
+<polygon class="ring" points="164.8,44.0 144.0,56.0 123.2,44.0 123.2,20.0 144.0,8.0 164.8,20.0"/>
+<polygon points="220.8,44.0 200.0,56.0 179.2,44.0 179.2,20.0 200.0,8.0 220.8,20.0" fill="hsl(212, 42%, 46%)"/>
+<text x="200.0" y="37.8" text-anchor="middle" fill="#ffffff" font-size="16" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-weight="600">SV</text>
+<polygon class="ring" points="220.8,44.0 200.0,56.0 179.2,44.0 179.2,20.0 200.0,8.0 220.8,20.0"/>
+<polygon points="80.8,91.0 60.0,103.0 39.2,91.0 39.2,67.0 60.0,55.0 80.8,67.0" fill="hsl(81, 42%, 46%)"/>
+<text x="60.0" y="84.8" text-anchor="middle" fill="#ffffff" font-size="16" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-weight="600">AD</text>
+<polygon class="ring" points="80.8,91.0 60.0,103.0 39.2,91.0 39.2,67.0 60.0,55.0 80.8,67.0"/>
+<polygon points="136.8,91.0 116.0,103.0 95.2,91.0 95.2,67.0 116.0,55.0 136.8,67.0" fill="hsl(180, 42%, 46%)"/>
+<text x="116.0" y="84.8" text-anchor="middle" fill="#ffffff" font-size="16" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-weight="600">HK</text>
+<polygon class="ring" points="136.8,91.0 116.0,103.0 95.2,91.0 95.2,67.0 116.0,55.0 136.8,67.0"/>
+</svg>

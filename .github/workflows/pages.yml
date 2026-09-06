@@ -1,0 +1,56 @@
+name: Pages
+
+# The default Actions token cannot create a Pages site. One-time, in a browser:
+# https://github.com/YauhenBichel/readme-contributors/settings/pages
+# Build and deployment → Source → GitHub Actions.
+# Then re-run this workflow.
+
+on:
+  push:
+    paths:
+      - "docs/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/configure-pages@v5
+        id: pages
+      - name: Explain a Setup Pages failure
+        if: failure() && steps.pages.outcome == 'failure'
+        run: |
+          echo "Setup Pages failed. Open"
+          echo "https://github.com/${GITHUB_REPOSITORY}/settings/pages"
+          echo "and set Build and deployment -> Source -> GitHub Actions."
+          echo "GITHUB_TOKEN cannot create the site itself."
+      - name: Pack the site
+        run: |
+          mkdir _site
+          cp docs/index.html docs/.nojekyll _site/
+          cp docs/*.svg _site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

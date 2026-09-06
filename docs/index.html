@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>README contributors — a circular wall for any GitHub repo</title>
+  <meta name="description" content="A composite GitHub Action that draws a contributors wall into a README. No table. No third-party list service. Pin v1.3.0 and pick a layout." />
+  <style>
+    :root {
+      --bg: #0d1117;
+      --ink: #e6edf3;
+      --muted: #8b949e;
+      --card: #161b22;
+      --line: #30363d;
+      --accent: #b392f0;
+      --accent-2: #79c0ff;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--ink); }
+    body {
+      font: 16px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    }
+    a { color: var(--accent-2); }
+    header, main, footer { width: min(920px, calc(100% - 32px)); margin: 0 auto; }
+    header { padding: 56px 0 24px; }
+    header p { color: var(--muted); max-width: 40rem; }
+    h1 { font-size: 2rem; letter-spacing: -0.03em; margin: 0 0 12px; }
+    h2 { font-size: 1.35rem; letter-spacing: -0.02em; margin: 48px 0 12px; }
+    h3 { font-size: 1.05rem; margin: 0 0 8px; }
+    .kicker { color: var(--accent); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-size: 0.72rem; }
+    .hero {
+      display: flex; justify-content: center; align-items: center;
+      background: var(--card); border: 1px solid var(--line); border-radius: 20px;
+      padding: 28px 16px; margin: 28px 0 16px;
+    }
+    .hero img { max-width: 100%; height: auto; }
+    nav { display: flex; flex-wrap: wrap; gap: 14px 20px; margin: 20px 0 0; }
+    nav a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
+    .grid { display: grid; gap: 16px; }
+    @media (min-width: 720px) { .grid.two { grid-template-columns: 1fr 1fr; } }
+    article {
+      background: var(--card); border: 1px solid var(--line); border-radius: 16px;
+      padding: 18px 18px 14px;
+    }
+    article img { display: block; max-width: 100%; height: auto; margin: 10px 0 12px; }
+    article p { color: var(--muted); margin: 0 0 10px; }
+    pre {
+      margin: 0; padding: 12px 14px; overflow: auto;
+      background: #010409; border-radius: 10px; border: 1px solid var(--line);
+      font: 12.5px/1.45 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color: #d2a8ff;
+    }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    ol { padding-left: 1.2rem; }
+    li { margin: 8px 0; }
+    footer { color: var(--muted); padding: 48px 0 64px; font-size: 0.92rem; }
+    .note { color: var(--muted); font-size: 0.92rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <p class="kicker">GitHub Action</p>
+    <h1>README contributors</h1>
+    <p>
+      Fill a README with a contributors wall from the GitHub API. Bots are
+      omitted. The wall is an SVG, not a <code>&lt;table&gt;</code>, so GitHub
+      does not draw a grid around it. Any public repository can pin the
+      <a href="https://github.com/YauhenBichel/readme-contributors/releases/tag/v1.3.0">v1.3.0</a>
+      release.
+    </p>
+    <nav>
+      <a href="#use">How to use it</a>
+      <a href="#layouts">Layouts</a>
+      <a href="#themes">Themes</a>
+      <a href="https://github.com/YauhenBichel/readme-contributors">Source</a>
+    </nav>
+  </header>
+  <main>
+    <div class="hero">
+      <img src="./demo.svg" width="310" alt="Live facepile from py-harness contributors" />
+    </div>
+    <p class="note">Live demo: the default <code>facepile</code>, drawn from the py-harness contributors API.</p>
+
+    <h2 id="use">How to use it</h2>
+    <ol>
+      <li>Add a pair of markers to <code>README.md</code>.</li>
+      <li>Call the Action. Pin the release tag, or a commit SHA if the job can write.</li>
+      <li>Commit the rewritten README and <code>.github/contributors.svg</code>.</li>
+    </ol>
+    <p>Markers:</p>
+    <pre>&lt;!-- readme: contributors,bots/- -start --&gt;
+&lt;!-- readme: contributors,bots/- -end --&gt;</pre>
+    <p>Minimal workflow:</p>
+    <pre>name: Contributors
+on:
+  schedule: [{ cron: "17 4 * * 0" }]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  readme:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: YauhenBichel/readme-contributors@v1.3.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add README.md .github/contributors.svg
+          git diff --cached --quiet && exit 0
+          git commit -m "docs: refresh README contributors"
+          git push</pre>
+    <p class="note">
+      A protected default branch should open a pull request instead of pushing.
+      A copy-paste job is in
+      <a href="https://github.com/YauhenBichel/readme-contributors/blob/main/examples/contributors.yml">examples/contributors.yml</a>.
+    </p>
+
+    <h2 id="layouts">Layouts</h2>
+    <p>Set <code>layout</code>. The default stays the overlapping facepile.</p>
+    <div class="grid two">
+      <article>
+        <h3>facepile</h3>
+        <p>Overlapping circles. First person sits on top.</p>
+        <img src="./layout-facepile.svg" alt="facepile layout" />
+        <pre>- uses: YauhenBichel/readme-contributors@v1.3.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    layout: facepile</pre>
+      </article>
+      <article>
+        <h3>grid</h3>
+        <p>Spaced circles. Wraps at <code>columns</code>.</p>
+        <img src="./layout-grid.svg" alt="grid layout" />
+        <pre>- uses: YauhenBichel/readme-contributors@v1.3.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    layout: grid</pre>
+      </article>
+      <article>
+        <h3>tiles</h3>
+        <p>Rounded squares instead of circles.</p>
+        <img src="./layout-tiles.svg" alt="tiles layout" />
+        <pre>- uses: YauhenBichel/readme-contributors@v1.3.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    layout: tiles</pre>
+      </article>
+      <article>
+        <h3>list</h3>
+        <p>Avatar, name, and login on each row.</p>
+        <img src="./layout-list.svg" alt="list layout" />
+        <pre>- uses: YauhenBichel/readme-contributors@v1.3.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    layout: list</pre>
+      </article>
+      <article>
+        <h3>compact</h3>
+        <p>A tighter grid when the list is long.</p>
+        <img src="./layout-compact.svg" alt="compact layout" />
+        <pre>- uses: YauhenBichel/readme-contributors@v1.3.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    layout: compact</pre>
+      </article>
+      <article>
+        <h3>wave</h3>
+        <p>A sine-staggered row. Good for a short team.</p>
+        <img src="./layout-wave.svg" alt="wave layout" />
+        <pre>- uses: YauhenBichel/readme-contributors@v1.3.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    layout: wave</pre>
+      </article>
+      <article>
+        <h3>orbit</h3>
+        <p>The first contributor in the middle, the rest on a ring.</p>
+        <img src="./layout-orbit.svg" alt="orbit layout" />
+        <pre>- uses: YauhenBichel/readme-contributors@v1.3.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    layout: orbit</pre>
+      </article>
+      <article>
+        <h3>honeycomb</h3>
+        <p>Hex tiles on offset rows.</p>
+        <img src="./layout-honeycomb.svg" alt="honeycomb layout" />
+        <pre>- uses: YauhenBichel/readme-contributors@v1.3.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    layout: honeycomb</pre>
+      </article>
+      <article>
+        <h3>ribbon</h3>
+        <p>A zipper row that steps up and down.</p>
+        <img src="./layout-ribbon.svg" alt="ribbon layout" />
+        <pre>- uses: YauhenBichel/readme-contributors@v1.3.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    layout: ribbon</pre>
+      </article>
+      <article>
+        <h3>constellation</h3>
+        <p>Faces with faint links between neighbours.</p>
+        <img src="./layout-constellation.svg" alt="constellation layout" />
+        <pre>- uses: YauhenBichel/readme-contributors@v1.3.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    layout: constellation</pre>
+      </article>
+      <article>
+        <h3>banner</h3>
+        <p>The first person is larger; the others sit beside them.</p>
+        <img src="./layout-banner.svg" alt="banner layout" />
+        <pre>- uses: YauhenBichel/readme-contributors@v1.3.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    layout: banner</pre>
+      </article>
+    </div>
+
+    <h2 id="themes">Themes</h2>
+    <p>
+      Set <code>theme</code>. <code>auto</code> follows the reader&rsquo;s light
+      or dark README. The others paint a frame.
+    </p>
+    <div class="grid two">
+      <article>
+        <h3>midnight</h3>
+        <img src="./theme-midnight.svg" alt="midnight theme" />
+        <pre>- uses: YauhenBichel/readme-contributors@v1.3.0
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    layout: facepile
+    theme: midnight</pre>
+      </article>
+      <article>
+        <h3>sunrise</h3>
+        <img src="./theme-sunrise.svg" alt="sunrise theme" />
+        <pre>theme: sunrise</pre>
+      </article>
+      <article>
+        <h3>forest</h3>
+        <img src="./theme-forest.svg" alt="forest theme" />
+        <pre>theme: forest</pre>
+      </article>
+      <article>
+        <h3>ocean</h3>
+        <img src="./theme-ocean.svg" alt="ocean theme" />
+        <pre>theme: ocean</pre>
+      </article>
+      <article>
+        <h3>mono</h3>
+        <img src="./theme-mono.svg" alt="mono theme" />
+        <pre>theme: mono</pre>
+      </article>
+    </div>
+    <p class="note"><code>theme</code> also accepts <code>auto</code> and <code>github</code>.</p>
+  </main>
+  <footer>
+    Apache-2.0.
+    <a href="https://github.com/YauhenBichel/readme-contributors">YauhenBichel/readme-contributors</a>.
+    Issues belong on that repository.
+  </footer>
+</body>
+</html>

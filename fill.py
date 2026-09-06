@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import base64
 import json
+import math
 import os
 import sys
 from pathlib import Path
@@ -27,7 +28,19 @@ TINY_PNG = bytes.fromhex(
     "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489"
     "0000000a49444154789c63000100000500010d0a2db40000000049454e44ae426082"
 )
-LAYOUTS = ("facepile", "grid", "tiles", "list", "compact")
+LAYOUTS = (
+    "facepile",
+    "grid",
+    "tiles",
+    "list",
+    "compact",
+    "wave",
+    "orbit",
+    "honeycomb",
+    "ribbon",
+    "constellation",
+    "banner",
+)
 THEMES = {
     "auto": {
         "ring": "#ffffff",
@@ -234,6 +247,8 @@ def _theme_css(theme: Mapping[str, str]) -> list[str]:
         f".label {{ fill: {theme['label']}; font-family: {_font()}; "
         "font-weight: 600; }",
         f".muted {{ fill: {theme['muted']}; font-family: {_font()}; }}",
+        f".link {{ fill: none; stroke: {theme['muted']}; stroke-width: 1.5; "
+        "stroke-opacity: 0.55; }",
     ]
     if theme.get("ring_dark"):
         lines.extend(
@@ -248,65 +263,208 @@ def _theme_css(theme: Mapping[str, str]) -> list[str]:
     return lines
 
 
-def _metrics(
+def _placements(
     layout: str,
+    count: int,
     size: int,
     columns: int,
-    count: int,
-    *,
     framed: bool,
-) -> dict[str, int]:
+) -> tuple[int, int, list[tuple[int, float, float, int]]]:
+    """Return canvas size and (index, x, y, face_size) for each person."""
     columns = max(1, columns)
     size = max(32, size)
+    spots: list[tuple[int, float, float, int]] = []
+    if count <= 0:
+        return 1, 1, spots
+
     if layout == "facepile":
         pad = 10 if framed else 4
         step = int(size * 0.64)
         row_gap = 14
-        name_w = 0
-    elif layout == "compact":
+        rows = (count + columns - 1) // columns
+        widest = min(columns, count)
+        width = pad * 2 + size + step * max(0, widest - 1)
+        height = pad * 2 + size * rows + row_gap * max(0, rows - 1)
+        for index in range(count):
+            column = index % columns
+            row = index // columns
+            spots.append(
+                (index, float(pad + column * step), float(pad + row * (size + row_gap)), size)
+            )
+        return width, height, spots
+
+    if layout == "list":
+        pad = 14 if framed else 12
+        row_gap = 10
+        name_w = 168
+        width = pad * 2 + size + 14 + name_w
+        height = pad * 2 + size * count + row_gap * max(0, count - 1)
+        for index in range(count):
+            spots.append((index, float(pad), float(pad + index * (size + row_gap)), size))
+        return width, height, spots
+
+    if layout == "wave":
+        pad = 14 if framed else 8
+        amp = int(size * 0.42)
+        step = int(size * 0.82)
+        cols = min(columns, count)
+        rows = (count + cols - 1) // cols
+        width = pad * 2 + step * max(0, cols - 1) + size
+        height = pad * 2 + rows * (size + 2 * amp) - amp
+        for index in range(count):
+            column = index % cols
+            row = index // cols
+            wave = amp + int(amp * math.sin(column * 0.95 + row))
+            spots.append(
+                (
+                    index,
+                    float(pad + column * step),
+                    float(pad + row * (size + 2 * amp) + wave),
+                    size,
+                )
+            )
+        return width, height, spots
+
+    if layout == "orbit":
+        pad = 16 if framed else 12
+        if count == 1:
+            width = pad * 2 + size
+            height = pad * 2 + size
+            spots.append((0, float(pad), float(pad), size))
+            return width, height, spots
+        ring = size * (0.95 + 0.08 * min(count, 10))
+        hero = int(size * 1.12)
+        canvas = int(2 * (ring + size / 2) + pad * 2)
+        cx = canvas / 2
+        cy = canvas / 2
+        spots.append((0, cx - hero / 2, cy - hero / 2, hero))
+        around = count - 1
+        for index in range(1, count):
+            angle = -math.pi / 2 + 2 * math.pi * (index - 1) / around
+            spots.append(
+                (
+                    index,
+                    cx + ring * math.cos(angle) - size / 2,
+                    cy + ring * math.sin(angle) - size / 2,
+                    size,
+                )
+            )
+        return canvas, canvas, spots
+
+    if layout == "honeycomb":
+        pad = 14 if framed else 8
+        pitch_x = size + 8
+        pitch_y = int(size * 0.86) + 6
+        rows = (count + columns - 1) // columns
+        width = pad * 2 + columns * pitch_x + pitch_x // 2
+        height = pad * 2 + rows * pitch_y + size - pitch_y
+        for index in range(count):
+            column = index % columns
+            row = index // columns
+            ox = (pitch_x / 2) if row % 2 else 0
+            spots.append(
+                (
+                    index,
+                    float(pad + ox + column * pitch_x),
+                    float(pad + row * pitch_y),
+                    size,
+                )
+            )
+        return width, height, spots
+
+    if layout == "ribbon":
+        pad = 14 if framed else 8
+        step_x = int(size * 0.72)
+        step_y = int(size * 0.36)
+        width = pad * 2 + step_x * max(0, count - 1) + size
+        height = pad * 2 + size + step_y
+        for index in range(count):
+            spots.append(
+                (
+                    index,
+                    float(pad + index * step_x),
+                    float(pad + (step_y if index % 2 else 0)),
+                    size,
+                )
+            )
+        return width, height, spots
+
+    if layout == "constellation":
+        pad = 16 if framed else 10
+        step = int(size * 1.15)
+        cols = min(columns, count)
+        rows = (count + cols - 1) // cols
+        width = pad * 2 + step * max(0, cols - 1) + size
+        height = pad * 2 + (size + 28) * max(0, rows - 1) + size
+        for index in range(count):
+            column = index % cols
+            row = index // cols
+            jitter = 10 if (index + row) % 2 else 0
+            spots.append(
+                (
+                    index,
+                    float(pad + column * step + (8 if row % 2 else 0)),
+                    float(pad + row * (size + 28) + jitter),
+                    size,
+                )
+            )
+        return width, height, spots
+
+    if layout == "banner":
+        pad = 14 if framed else 10
+        hero = int(size * 1.55)
+        side_cols = min(3, max(1, count - 1))
+        rest = max(0, count - 1)
+        side_rows = (rest + side_cols - 1) // side_cols if rest else 0
+        gap = 12
+        width = pad * 2 + hero + (gap + (size + 10) * side_cols if rest else 0)
+        height = pad * 2 + max(hero, side_rows * (size + 10) - 10 if rest else hero)
+        spots.append((0, float(pad), float(pad), hero))
+        for index in range(1, count):
+            slot = index - 1
+            column = slot % side_cols
+            row = slot // side_cols
+            spots.append(
+                (
+                    index,
+                    float(pad + hero + gap + column * (size + 10)),
+                    float(pad + row * (size + 10)),
+                    size,
+                )
+            )
+        return width, height, spots
+
+    if layout == "compact":
         pad = 10 if framed else 6
         step = size + 6
         row_gap = 6
-        name_w = 0
-    elif layout == "list":
-        columns = 1
-        pad = 14 if framed else 12
-        step = 1
-        row_gap = 10
-        name_w = 168
     elif layout == "tiles":
         pad = 14 if framed else 10
         step = size + 14
         row_gap = 14
-        name_w = 0
     else:
         pad = 12 if framed else 8
         step = size + 12
         row_gap = 12
-        name_w = 0
-    rows = (count + columns - 1) // columns if count else 1
-    widest = min(columns, count) if count else 1
-    if layout == "list":
-        width = pad * 2 + size + 14 + name_w
-        height = pad * 2 + size * count + row_gap * max(0, count - 1)
-    elif layout == "facepile":
-        width = pad * 2 + size + step * max(0, widest - 1)
-        height = pad * 2 + size * rows + row_gap * max(0, rows - 1)
-    else:
-        width = pad * 2 + step * max(0, widest - 1) + size
-        height = pad * 2 + (size + row_gap) * max(0, rows - 1) + size
-    return {
-        "columns": columns,
-        "size": size,
-        "pad": pad,
-        "step": step,
-        "row_gap": row_gap,
-        "rows": rows,
-        "widest": widest,
-        "width": max(1, width),
-        "height": max(1, height),
-        "name_w": name_w,
-    }
+    rows = (count + columns - 1) // columns
+    widest = min(columns, count)
+    width = pad * 2 + step * max(0, widest - 1) + size
+    height = pad * 2 + (size + row_gap) * max(0, rows - 1) + size
+    for index in range(count):
+        column = index % columns
+        row = index // columns
+        spots.append(
+            (index, float(pad + column * step), float(pad + row * (size + row_gap)), size)
+        )
+    return width, height, spots
+
+
+def _hex_points(cx: float, cy: float, radius: float) -> str:
+    parts = []
+    for step in range(6):
+        angle = math.radians(30 + 60 * step)
+        parts.append(f"{cx + radius * math.cos(angle):.1f},{cy + radius * math.sin(angle):.1f}")
+    return " ".join(parts)
 
 
 def _paint_face(
@@ -335,6 +493,12 @@ def _paint_face(
             f'rx="{radius_x:.1f}"/>'
             "</clipPath>"
         )
+    elif shape == "hex":
+        defs.append(
+            f'<clipPath id="{clip}">'
+            f'<polygon points="{_hex_points(cx, cy, radius)}"/>'
+            "</clipPath>"
+        )
     else:
         defs.append(
             f'<clipPath id="{clip}">'
@@ -357,6 +521,11 @@ def _paint_face(
                 f'<rect x="{x:.1f}" y="{y:.1f}" width="{size}" height="{size}" '
                 f'rx="{size * 0.2:.1f}" fill="hsl({hue}, 42%, 46%)"/>'
             )
+        elif shape == "hex":
+            body.append(
+                f'<polygon points="{_hex_points(cx, cy, radius)}" '
+                f'fill="hsl({hue}, 42%, 46%)"/>'
+            )
         else:
             body.append(
                 f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="{radius:.1f}" '
@@ -373,6 +542,10 @@ def _paint_face(
         body.append(
             f'<rect class="ring" x="{x:.1f}" y="{y:.1f}" width="{size}" '
             f'height="{size}" rx="{size * 0.2:.1f}"/>'
+        )
+    elif shape == "hex":
+        body.append(
+            f'<polygon class="ring" points="{_hex_points(cx, cy, radius)}"/>'
         )
     else:
         body.append(
@@ -401,14 +574,9 @@ def render_svg(
         )
     pictures = avatars or {}
     framed = bool(palette.get("bg"))
-    metrics = _metrics(layout, size, columns, len(people), framed=framed)
-    size = metrics["size"]
-    columns = metrics["columns"]
-    pad = metrics["pad"]
-    step = metrics["step"]
-    row_gap = metrics["row_gap"]
-    width = metrics["width"]
-    height = metrics["height"]
+    width, height, spots = _placements(
+        layout, len(people), size, columns, framed
+    )
     names = ", ".join(person["name"] for person in people)
     defs: list[str] = _theme_css(palette)
     body: list[str] = []
@@ -417,25 +585,34 @@ def render_svg(
             f'<rect width="{width}" height="{height}" rx="16" '
             f'fill="{palette["bg"]}"/>'
         )
-    shape = "tile" if layout == "tiles" else "circle"
-    order = (
-        reversed(list(enumerate(people)))
-        if layout == "facepile"
-        else enumerate(people)
-    )
-    for index, person in order:
-        if layout == "list":
-            x = float(pad)
-            y = float(pad + index * (size + row_gap))
-        else:
-            column = index % columns
-            row = index // columns
-            x = float(pad + column * step)
-            y = float(pad + row * (size + row_gap))
+    if layout == "constellation" and len(spots) > 1:
+        for left, right in zip(spots, spots[1:]):
+            _ia, xa, ya, sa = left
+            _ib, xb, yb, sb = right
+            body.append(
+                f'<line class="link" x1="{xa + sa / 2:.1f}" y1="{ya + sa / 2:.1f}" '
+                f'x2="{xb + sb / 2:.1f}" y2="{yb + sb / 2:.1f}"/>'
+            )
+    if layout == "orbit" and len(people) > 1:
+        _i0, x0, y0, s0 = spots[0]
+        body.append(
+            f'<circle class="link" cx="{x0 + s0 / 2:.1f}" '
+            f'cy="{y0 + s0 / 2:.1f}" r="{s0 * 0.95 + size * 0.55:.1f}"/>'
+        )
+    shape = "tile" if layout == "tiles" else "hex" if layout == "honeycomb" else "circle"
+    if layout == "facepile":
+        draw = list(reversed(spots))
+    elif layout == "orbit":
+        draw = spots[1:] + spots[:1]
+    else:
+        draw = spots
+    by_index = {index: person for index, person in enumerate(people)}
+    for index, x, y, face in draw:
+        person = by_index[index]
         if layout == "list" and palette.get("card"):
             body.append(
-                f'<rect x="{pad - 4:.1f}" y="{y - 4:.1f}" '
-                f'width="{width - pad * 2 + 8}" height="{size + 8}" '
+                f'<rect x="{x - 4:.1f}" y="{y - 4:.1f}" '
+                f'width="{width - x * 2 + 8}" height="{face + 8}" '
                 f'rx="12" fill="{palette["card"]}"/>'
             )
         _paint_face(
@@ -446,19 +623,19 @@ def render_svg(
             pictures=pictures,
             x=x,
             y=y,
-            size=size,
+            size=face,
             shape=shape,
         )
         if layout == "list":
             login = _xml(person["login"])
             label = _xml(person["name"])
             body.append(
-                f'<text class="label" x="{x + size + 14:.1f}" '
-                f'y="{y + size * 0.42:.1f}" font-size="15">{label}</text>'
+                f'<text class="label" x="{x + face + 14:.1f}" '
+                f'y="{y + face * 0.42:.1f}" font-size="15">{label}</text>'
             )
             body.append(
-                f'<text class="muted" x="{x + size + 14:.1f}" '
-                f'y="{y + size * 0.72:.1f}" font-size="12">@{login}</text>'
+                f'<text class="muted" x="{x + face + 14:.1f}" '
+                f'y="{y + face * 0.72:.1f}" font-size="12">@{login}</text>'
             )
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" '
@@ -537,7 +714,10 @@ def svg_width(
     layout = parse_layout(layout)
     theme_name = parse_theme(theme)
     framed = bool(THEMES[theme_name].get("bg"))
-    return _metrics(layout, size, columns, len(people), framed=framed)["width"]
+    width, _height, _spots = _placements(
+        layout, len(people), size, columns, framed
+    )
+    return width
 
 
 def apply_readme(text: str, block: str) -> str:

@@ -19,7 +19,8 @@ inputs:
     default: svg
   layout:
     description: >
-      Wall layout. One of facepile (default), grid, tiles, list, compact.
+      Wall layout. One of facepile (default), grid, tiles, list, compact,
+      wave, orbit, honeycomb, ribbon, constellation, banner.
     default: facepile
   theme:
     description: >
