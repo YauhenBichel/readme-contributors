@@ -2,8 +2,8 @@
 """Fill a README contributors wall from the GitHub API.
 
 Bots are omitted. The default drawing is a circular facepile SVG so the
-README does not pick up GitHub's table borders. A linked name row under
-the picture keeps every person clickable. Layouts and themes change the
+README does not pick up GitHub's table borders. Every face is a link to
+that person's GitHub profile. Layouts and themes change the
 drawing; they do not change who is listed.
 """
 
@@ -248,7 +248,7 @@ def _theme_css(theme: Mapping[str, str]) -> list[str]:
         "font-weight: 600; }",
         f".muted {{ fill: {theme['muted']}; font-family: {_font()}; }}",
         f".link {{ fill: none; stroke: {theme['muted']}; stroke-width: 1.5; "
-        "stroke-opacity: 0.55; }",
+        "stroke-opacity: 0.55; pointer-events: none; }",
     ]
     if theme.get("ring_dark"):
         lines.extend(
@@ -563,7 +563,7 @@ def render_svg(
     layout: str = "facepile",
     theme: str = "auto",
 ) -> str:
-    """Draw the wall. Names stay in the HTML row so each face stays a link."""
+    """Draw the wall. Each face is a link to that person's GitHub profile."""
     layout = parse_layout(layout)
     theme_name = parse_theme(theme)
     palette = THEMES[theme_name]
@@ -615,9 +615,10 @@ def render_svg(
                 f'width="{width - x * 2 + 8}" height="{face + 8}" '
                 f'rx="12" fill="{palette["card"]}"/>'
             )
+        face_bits: list[str] = []
         _paint_face(
             defs,
-            body,
+            face_bits,
             index=index,
             person=person,
             pictures=pictures,
@@ -629,14 +630,18 @@ def render_svg(
         if layout == "list":
             login = _xml(person["login"])
             label = _xml(person["name"])
-            body.append(
+            face_bits.append(
                 f'<text class="label" x="{x + face + 14:.1f}" '
                 f'y="{y + face * 0.42:.1f}" font-size="15">{label}</text>'
             )
-            body.append(
+            face_bits.append(
                 f'<text class="muted" x="{x + face + 14:.1f}" '
                 f'y="{y + face * 0.72:.1f}" font-size="12">@{login}</text>'
             )
+        href = f"https://github.com/{_xml(person['login'])}"
+        body.append(f'<a href="{href}" target="_top">')
+        body.extend(face_bits)
+        body.append("</a>")
     return (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" '
         f'height="{height}" role="img" aria-label="{_xml(names)}">\n'
@@ -690,16 +695,13 @@ def render_wall(
     format: str = "svg",
 ) -> str:
     names = render_names(people)
+    icons = render_html(people, size=size)
     if format == "html" or not svg_href:
-        return render_html(people, size=size) + names
-    alt = _xml(", ".join(person["name"] for person in people) or "Contributors")
-    width = f' width="{svg_width}"' if svg_width else ""
-    picture = (
-        f'<p align="center">\n'
-        f'  <img src="{_xml(svg_href)}"{width} alt="{alt}" />\n'
-        f"</p>\n"
-    )
-    return picture + names
+        return icons + names
+    # GitHub renders <img src="*.svg"> as one picture, so an <a> inside
+    # the SVG file is not a README link. Each icon is therefore its own
+    # <a><img></a>. The SVG file is still written for Pages.
+    return icons + names
 
 
 def svg_width(
