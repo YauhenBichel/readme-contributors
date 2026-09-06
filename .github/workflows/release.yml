@@ -50,6 +50,8 @@ jobs:
           grep -q '^branding:' action.yml
           grep -q 'icon:' action.yml
           grep -q 'color:' action.yml
+          # Marketplace rejects descriptions longer than 125 characters.
+          python3 -c 'from pathlib import Path; import re, sys; t=Path("action.yml").read_text(); m=re.search(r"^description:\s*>\n((?:  .*\n)+)|^description:\s*(.+)$", t, re.M); b=re.sub(r"\s+"," ", (m.group(1) or m.group(2) or "")).strip(); print(f"description_len={len(b)}"); sys.exit(f"action.yml description is {len(b)} chars; Marketplace limit is 125") if len(b)>125 else None'
 
       - name: Tests
         run: python3 -m unittest discover -s tests -q

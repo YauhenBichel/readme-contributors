@@ -1,7 +1,7 @@
 name: README contributors
 description: >
   Fill a README with clickable polaroid stickers from the GitHub
-  contributors API. Bots are omitted. No third-party list service.
+  contributors API. Bots omitted. No third-party list service.
 author: readme-contributors
 branding:
   icon: users
