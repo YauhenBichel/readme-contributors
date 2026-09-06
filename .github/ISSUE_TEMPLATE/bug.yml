@@ -1,0 +1,25 @@
+name: Bug
+description: Something the Action wrote is wrong
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: seen
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: input
+    id: format
+    attributes:
+      label: format input
+      placeholder: svg or html
+  - type: markdown
+    attributes:
+      value: Do not paste tokens or `.env` contents.

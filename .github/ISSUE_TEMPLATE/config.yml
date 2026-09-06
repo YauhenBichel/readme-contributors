@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: py-harness
+    url: https://github.com/YauhenBichel/py-harness
+    about: The laptop harness that uses this Action

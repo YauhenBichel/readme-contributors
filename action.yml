@@ -1,0 +1,70 @@
+name: README contributors
+description: >
+  Fill a README with a circular-avatar contributors wall from the GitHub
+  API. Bots are omitted. No third-party list service.
+author: readme-contributors
+branding:
+  icon: users
+  color: purple
+
+inputs:
+  readme:
+    description: Markdown file that contains the contributor markers
+    default: README.md
+  svg:
+    description: Where to write the generated SVG wall (format=svg)
+    default: .github/contributors.svg
+  format:
+    description: svg (circular wall) or html (linked avatars, no extra file)
+    default: svg
+  columns:
+    description: Faces per row
+    default: "8"
+  avatar-size:
+    description: Face diameter in pixels
+    default: "72"
+  max:
+    description: Maximum people to draw (API order, bots already omitted)
+    default: "48"
+  repository:
+    description: owner/name to read contributors from
+    default: ${{ github.repository }}
+  token:
+    description: Token for the GitHub API (raises the rate limit)
+    default: ${{ github.token }}
+  check:
+    description: If true, exit 1 when the README or SVG would change
+    default: "false"
+  marker-start:
+    description: Inclusive start marker in the markdown file
+    default: "<!-- readme: contributors,bots/- -start -->"
+  marker-end:
+    description: Inclusive end marker in the markdown file
+    default: "<!-- readme: contributors,bots/- -end -->"
+
+outputs:
+  count:
+    description: Number of people written
+    value: ${{ steps.fill.outputs.count }}
+  changed:
+    description: true when the README or SVG was rewritten
+    value: ${{ steps.fill.outputs.changed }}
+
+runs:
+  using: composite
+  steps:
+    - id: fill
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+        GITHUB_REPOSITORY: ${{ inputs.repository }}
+        README_PATH: ${{ inputs.readme }}
+        SVG_PATH: ${{ inputs.svg }}
+        FORMAT: ${{ inputs.format }}
+        COLUMNS: ${{ inputs.columns }}
+        AVATAR_SIZE: ${{ inputs.avatar-size }}
+        MAX_PEOPLE: ${{ inputs.max }}
+        CHECK: ${{ inputs.check }}
+        MARKER_START: ${{ inputs.marker-start }}
+        MARKER_END: ${{ inputs.marker-end }}
+      run: python3 "$GITHUB_ACTION_PATH/fill.py"

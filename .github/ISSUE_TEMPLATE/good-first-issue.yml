@@ -1,0 +1,24 @@
+name: Good first issue
+description: A small, bounded change for a first-time contributor
+title: "[good first issue] "
+labels: ["good first issue"]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: What to change
+      description: One sentence. A first PR should finish in an evening.
+    validations:
+      required: true
+  - type: textarea
+    id: test
+    attributes:
+      label: How we will know it is done
+      description: Name the test that should fail first, then pass.
+    validations:
+      required: true
+  - type: markdown
+    attributes:
+      value: |
+        Fork, run `python3 -m unittest discover -s tests -q`, open a
+        pull request. See CONTRIBUTING.md.
