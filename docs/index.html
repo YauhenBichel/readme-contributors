@@ -34,6 +34,18 @@
       padding: 28px 16px; margin: 28px 0 16px;
     }
     .hero img, .hero object { max-width: 100%; height: auto; }
+    .live {
+      display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end;
+      gap: 4px 6px; width: 100%;
+    }
+    .live a { text-decoration: none; line-height: 0; }
+    .live img {
+      width: clamp(84px, 14vw, 124px); height: auto;
+      transition: transform 160ms ease;
+    }
+    .live a:nth-child(2n) img { transform: rotate(3deg); }
+    .live a:nth-child(3n) img { transform: rotate(-4deg); }
+    .live a:hover img { transform: rotate(-6deg) scale(1.08); }
     nav { display: flex; flex-wrap: wrap; gap: 14px 20px; margin: 20px 0 0; }
     nav a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line); }
     .used { display: grid; gap: 12px; margin: 16px 0; }
@@ -82,6 +94,7 @@
       release.
     </p>
     <nav>
+      <a href="#live">Live demo</a>
       <a href="#use">How to use it</a>
       <a href="#used-by">Used by</a>
       <a href="#layouts">Layouts</a>
@@ -90,10 +103,22 @@
     </nav>
   </header>
   <main>
-    <div class="hero">
-      <object type="image/svg+xml" data="./demo.svg" width="560">Live stickers from py-harness contributors</object>
+    <div class="hero" id="live">
+      <div class="live">
+        <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src="./faces/YauhenBichel.svg" width="110" alt="Yauhen Bichel" /></a>
+        <a href="https://github.com/xianjianlf2" title="Mark Xian"><img src="./faces/xianjianlf2.svg" width="84" alt="Mark Xian" /></a>
+        <a href="https://github.com/ItzSaurav" title="Itzsaurav"><img src="./faces/ItzSaurav.svg" width="92" alt="Itzsaurav" /></a>
+        <a href="https://github.com/svkzn" title="svkzn"><img src="./faces/svkzn.svg" width="102" alt="svkzn" /></a>
+        <a href="https://github.com/Aditya-233" title="Aditya"><img src="./faces/Aditya-233.svg" width="80" alt="Aditya" /></a>
+        <a href="https://github.com/kkkhs" title="Huangshuo Kuang"><img src="./faces/kkkhs.svg" width="96" alt="Huangshuo Kuang" /></a>
+      </div>
     </div>
-    <p class="note">Live demo: py-harness faces. The README itself uses tilted polaroids so every card is a profile link.</p>
+    <p class="note">
+      Live demo: tap a card. These are the
+      <a href="https://github.com/YauhenBichel/py-harness">py-harness</a>
+      contributors, the same polaroids the Action writes into a README.
+      The <a href="./demo.svg">SVG stickers layout</a> is the Pages drawing.
+    </p>
 
     <h2 id="used-by">Used by</h2>
     <p>Public repositories that pin this Action on their default branch.</p>
