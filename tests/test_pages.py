@@ -19,6 +19,9 @@ class PagesTest(unittest.TestCase):
         self.assertIn("layout: honeycomb", text)
         self.assertIn("theme: midnight", text)
         self.assertIn("id=\"used-by\"", text)
+        self.assertIn("id=\"live\"", text)
+        self.assertIn("./faces/YauhenBichel.svg", text)
+        self.assertIn('href="https://github.com/YauhenBichel"', text)
         self.assertIn("github.com/YauhenBichel/py-harness", text)
         self.assertIn("github.com/YauhenBichel/merge-cheer", text)
         self.assertNotIn("/Users/", text)
@@ -43,6 +46,12 @@ class PagesTest(unittest.TestCase):
             "layout-constellation.svg",
             "layout-banner.svg",
             "theme-midnight.svg",
+            "faces/YauhenBichel.svg",
+            "faces/xianjianlf2.svg",
+            "faces/ItzSaurav.svg",
+            "faces/svkzn.svg",
+            "faces/Aditya-233.svg",
+            "faces/kkkhs.svg",
         ):
             self.assertIn(f"./{name}", text)
             path = ROOT / "docs" / name
