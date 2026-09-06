@@ -1,6 +1,7 @@
 name: Contributors
 
 # Refreshes the live demo (py-harness faces) and this repository's own wall.
+# Protected main refuses a GITHUB_TOKEN push, so the refresh is a PR.
 
 on:
   schedule:
@@ -17,6 +18,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   readme:
@@ -32,7 +34,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: YauhenBichel/py-harness
-          svg: docs/demo.svg
+          format: html
           marker-start: "<!-- demo: live -start -->"
           marker-end: "<!-- demo: live -end -->"
 
@@ -40,13 +42,23 @@ jobs:
         uses: ./
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          svg: .github/contributors.svg
+          format: html
 
-      - name: Push if the wall changed
+      - name: Offer the refresh as a pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add README.md docs/demo.svg .github/contributors.svg
+          git add README.md
           git diff --cached --quiet && exit 0
           git commit -m "docs: refresh live demo and contributors"
-          git push
+          git checkout -B docs/contributors
+          git push --force --set-upstream origin docs/contributors
+          NUMBER="$(gh pr list --head docs/contributors --state open --json number -q '.[0].number')"
+          if [ -z "$NUMBER" ]; then
+            gh pr create --base "$DEFAULT_BRANCH" --head docs/contributors \
+              --title "docs: refresh live demo and contributors" \
+              --body "Filled from the GitHub contributors API, bots omitted. Opened because main takes changes only through a pull request."
+          fi
