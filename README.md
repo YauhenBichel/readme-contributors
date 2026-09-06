@@ -7,10 +7,10 @@
 A composite GitHub Action that fills a circular-avatar contributors wall
 into a README. It reads the GitHub contributors API, omits bots, and
 replaces a pair of HTML markers. Any public repository can use the
-[v1.2.0 release](https://github.com/YauhenBichel/readme-contributors/releases/tag/v1.2.0):
+[v1.3.0 release](https://github.com/YauhenBichel/readme-contributors/releases/tag/v1.3.0):
 
 ```yaml
-- uses: YauhenBichel/readme-contributors@v1.2.0
+- uses: YauhenBichel/readme-contributors@v1.3.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
 ```
@@ -36,6 +36,8 @@ other repositories get.
 </p>
 <!-- demo: live -end -->
 
+Examples for every layout live on the
+[GitHub Pages site](https://yauhenbichel.github.io/readme-contributors/).
 Used by [py-harness](https://github.com/YauhenBichel/py-harness) and
 [MoleCare](https://github.com/MoleCare). Issues and pull requests
 belong **here**.
@@ -68,8 +70,44 @@ Set `layout`. The default stays the overlapping facepile.
   <img src="./docs/layout-compact.svg" width="378" alt="compact layout" />
 </p>
 
+**wave** — a sine-staggered row.
+
+<p align="center">
+  <img src="./docs/layout-wave.svg" alt="wave layout" />
+</p>
+
+**orbit** — first person in the middle, the rest on a ring.
+
+<p align="center">
+  <img src="./docs/layout-orbit.svg" alt="orbit layout" />
+</p>
+
+**honeycomb** — hex tiles on offset rows.
+
+<p align="center">
+  <img src="./docs/layout-honeycomb.svg" alt="honeycomb layout" />
+</p>
+
+**ribbon** — a zipper that steps up and down.
+
+<p align="center">
+  <img src="./docs/layout-ribbon.svg" alt="ribbon layout" />
+</p>
+
+**constellation** — faces with faint links between neighbours.
+
+<p align="center">
+  <img src="./docs/layout-constellation.svg" alt="constellation layout" />
+</p>
+
+**banner** — the first person is larger; the others sit beside them.
+
+<p align="center">
+  <img src="./docs/layout-banner.svg" alt="banner layout" />
+</p>
+
 ```yaml
-- uses: YauhenBichel/readme-contributors@v1.2.0
+- uses: YauhenBichel/readme-contributors@v1.3.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: tiles
@@ -93,7 +131,7 @@ others paint a frame so the wall stays the same in both.
 </p>
 
 ```yaml
-- uses: YauhenBichel/readme-contributors@v1.2.0
+- uses: YauhenBichel/readme-contributors@v1.3.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: facepile
@@ -141,7 +179,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: YauhenBichel/readme-contributors@v1.2.0
+      - uses: YauhenBichel/readme-contributors@v1.3.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           # layout: tiles
@@ -181,7 +219,7 @@ No token, no GPU, no extra packages. `fill.py` is stdlib only.
 | `readme` | `README.md` | File that holds the markers |
 | `svg` | `.github/contributors.svg` | Generated wall (when `format` is `svg`) |
 | `format` | `svg` | `svg` for a drawn wall, `html` for linked avatars only |
-| `layout` | `facepile` | `facepile`, `grid`, `tiles`, `list`, or `compact` |
+| `layout` | `facepile` | `facepile`, `grid`, `tiles`, `list`, `compact`, `wave`, `orbit`, `honeycomb`, `ribbon`, `constellation`, `banner` |
 | `theme` | `auto` | `auto`, `github`, `midnight`, `sunrise`, `forest`, `ocean`, `mono` |
 | `columns` | `8` | Faces per row |
 | `avatar-size` | `72` | Face diameter, pixels |

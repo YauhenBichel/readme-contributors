@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="209" height="209" role="img" aria-label="Yauhen Bichel, Mark Xian, Itzsaurav, svkzn, Aditya, Huangshuo Kuang">
+<title>Yauhen Bichel, Mark Xian, Itzsaurav, svkzn, Aditya, Huangshuo Kuang</title>
+<defs>
+<style>
+.ring { fill: none; stroke: #ffffff; stroke-width: 4; }
+.label { fill: #24292f; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif; font-weight: 600; }
+.muted { fill: #57606a; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif; }
+.link { fill: none; stroke: #57606a; stroke-width: 1.5; stroke-opacity: 0.55; }
+@media (prefers-color-scheme: dark) {
+  .ring { stroke: #0d1117; }
+  .label { fill: #e6edf3; }
+}
+</style>
+<clipPath id="c1"><circle cx="104.5" cy="35.9" r="24.0"/></clipPath>
+<clipPath id="c2"><circle cx="169.8" cy="83.3" r="24.0"/></clipPath>
+<clipPath id="c3"><circle cx="144.8" cy="160.0" r="24.0"/></clipPath>
+<clipPath id="c4"><circle cx="64.2" cy="160.0" r="24.0"/></clipPath>
+<clipPath id="c5"><circle cx="39.2" cy="83.3" r="24.0"/></clipPath>
+<clipPath id="c0"><circle cx="104.5" cy="104.5" r="26.5"/></clipPath>
+</defs>
+<circle class="link" cx="104.5" cy="104.5" r="76.8"/>
+<circle cx="104.5" cy="35.9" r="24.0" fill="hsl(30, 42%, 46%)"/>
+<text x="104.5" y="41.6" text-anchor="middle" fill="#ffffff" font-size="16" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-weight="600">MX</text>
+<circle class="ring" cx="104.5" cy="35.9" r="24.0"/>
+<circle cx="169.8" cy="83.3" r="24.0" fill="hsl(217, 42%, 46%)"/>
+<text x="169.8" y="89.0" text-anchor="middle" fill="#ffffff" font-size="16" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-weight="600">IT</text>
+<circle class="ring" cx="169.8" cy="83.3" r="24.0"/>
+<circle cx="144.8" cy="160.0" r="24.0" fill="hsl(212, 42%, 46%)"/>
+<text x="144.8" y="165.8" text-anchor="middle" fill="#ffffff" font-size="16" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-weight="600">SV</text>
+<circle class="ring" cx="144.8" cy="160.0" r="24.0"/>
+<circle cx="64.2" cy="160.0" r="24.0" fill="hsl(81, 42%, 46%)"/>
+<text x="64.2" y="165.8" text-anchor="middle" fill="#ffffff" font-size="16" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-weight="600">AD</text>
+<circle class="ring" cx="64.2" cy="160.0" r="24.0"/>
+<circle cx="39.2" cy="83.3" r="24.0" fill="hsl(180, 42%, 46%)"/>
+<text x="39.2" y="89.0" text-anchor="middle" fill="#ffffff" font-size="16" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-weight="600">HK</text>
+<circle class="ring" cx="39.2" cy="83.3" r="24.0"/>
+<circle cx="104.5" cy="104.5" r="26.5" fill="hsl(121, 42%, 46%)"/>
+<text x="104.5" y="110.9" text-anchor="middle" fill="#ffffff" font-size="18" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-weight="600">YB</text>
+<circle class="ring" cx="104.5" cy="104.5" r="26.5"/>
+</svg>

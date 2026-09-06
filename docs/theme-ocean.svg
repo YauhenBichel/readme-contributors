@@ -5,6 +5,7 @@
 .ring { fill: none; stroke: #e0f2fe; stroke-width: 4; }
 .label { fill: #0c4a6e; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif; font-weight: 600; }
 .muted { fill: #0369a1; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif; }
+.link { fill: none; stroke: #0369a1; stroke-width: 1.5; stroke-opacity: 0.55; }
 </style>
 <clipPath id="c5"><circle cx="242.0" cy="42.0" r="32.0"/></clipPath>
 <clipPath id="c4"><circle cx="202.0" cy="42.0" r="32.0"/></clipPath>
