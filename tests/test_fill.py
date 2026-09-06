@@ -38,6 +38,8 @@ class FillTest(unittest.TestCase):
         self.assertIn("<svg", (ROOT / "docs" / "demo.svg").read_text(encoding="utf-8"))
         self.assertIn("layout: tiles", text)
         self.assertIn("theme: midnight", text)
+        self.assertIn("GitHub Action", text)
+        self.assertIn("yauhenbichel.github.io/readme-contributors", text)
         for name in (
             "layout-grid.svg",
             "layout-tiles.svg",

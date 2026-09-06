@@ -2,11 +2,20 @@
 
 [![CI](https://github.com/YauhenBichel/readme-contributors/actions/workflows/ci.yml/badge.svg)](https://github.com/YauhenBichel/readme-contributors/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
+[![GitHub Action](https://img.shields.io/badge/GitHub%20Action-v1.3.0-6e5494)](https://github.com/marketplace/actions/readme-contributors)
+[![Examples](https://img.shields.io/badge/examples-GitHub%20Pages-0969da)](https://yauhenbichel.github.io/readme-contributors/)
 [![good first issue](https://img.shields.io/github/issues/YauhenBichel/readme-contributors/good%20first%20issue)](https://github.com/YauhenBichel/readme-contributors/labels/good%20first%20issue)
 
-A composite GitHub Action that fills a circular-avatar contributors wall
-into a README. It reads the GitHub contributors API, omits bots, and
-replaces a pair of HTML markers. Any public repository can use the
+A **GitHub Action** that draws a **contributors** wall into your
+**README**: circular **SVG** avatars (facepile, grid, tiles, orbit,
+honeycomb, and more). It reads the GitHub contributors API, omits
+bots, and replaces a pair of HTML markers. No `<table>`, so GitHub
+does not draw a grid. No third-party list service.
+
+Examples and copy-paste workflows:
+[yauhenbichel.github.io/readme-contributors](https://yauhenbichel.github.io/readme-contributors/).
+
+Any public repository can pin the
 [v1.3.0 release](https://github.com/YauhenBichel/readme-contributors/releases/tag/v1.3.0):
 
 ```yaml
