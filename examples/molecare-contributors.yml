@@ -27,7 +27,7 @@ jobs:
           ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref_name }}
           persist-credentials: true
 
-      - uses: YauhenBichel/readme-contributors@dde1d84bb305e531a8f923263791b0767a6bdd7c # v1
+      - uses: YauhenBichel/readme-contributors@v1.2.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
