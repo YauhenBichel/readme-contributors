@@ -365,13 +365,19 @@ def list_merged_pr_authors(
     repo: str, token: str, limit: int
 ) -> list[dict[str, str]]:
     extras: list[dict[str, str]] = []
+    seen: set[str] = set()
     page = 1
-    while len(extras) < limit:
+    while len(seen) < limit:
         rows = _get(
             f"{API}/repos/{repo}/pulls?state=closed&per_page=100&page={page}",
             token,
         )
-        extras.extend(merged_pr_people(rows))
+        batch = merged_pr_people(rows)
+        extras.extend(batch)
+        for extra in batch:
+            login = str(extra.get("login") or "").strip().lower()
+            if login:
+                seen.add(login)
         if not isinstance(rows, list) or len(rows) < 100:
             break
         page += 1
