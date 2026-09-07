@@ -144,6 +144,163 @@ def _bytes(url: str, token: str) -> bytes:
         return resp.read()
 
 
+def is_human_login(login: str, kind: str = "") -> bool:
+    if not (login or "").strip():
+        return False
+    if (kind or "").lower() == "bot":
+        return False
+    return not login.lower().endswith("[bot]")
+
+
+def merge_people(
+    people: list[dict[str, str]],
+    extras: list[dict[str, str]],
+    limit: int,
+) -> list[dict[str, str]]:
+    """Append unique humans from extras without growing past limit."""
+    seen = {person["login"].lower() for person in people}
+    out = list(people)
+    for extra in extras:
+        if len(out) >= limit:
+            break
+        login = str(extra.get("login") or "").strip()
+        kind = str(extra.get("type") or "")
+        if not is_human_login(login, kind) or login.lower() in seen:
+            continue
+        seen.add(login.lower())
+        name = str(extra.get("name") or "").strip() or login
+        out.append({"login": login, "name": name})
+    return out
+
+
+def trigger_people(
+    actor: str = "",
+    event: Mapping[str, object] | None = None,
+) -> list[dict[str, str]]:
+    """Authors of the commit or pull request that triggered this job."""
+    extras: list[dict[str, str]] = []
+    if actor.strip():
+        extras.append({"login": actor.strip(), "name": actor.strip()})
+    if not isinstance(event, Mapping):
+        return extras
+
+    def _add_user(user: object) -> None:
+        if not isinstance(user, Mapping):
+            return
+        login = str(user.get("login") or user.get("username") or "").strip()
+        if not login:
+            return
+        extras.append(
+            {
+                "login": login,
+                "name": str(user.get("name") or login),
+                "type": str(user.get("type") or ""),
+            }
+        )
+
+    pull = event.get("pull_request")
+    if isinstance(pull, Mapping):
+        _add_user(pull.get("user"))
+
+    head = event.get("head_commit")
+    if isinstance(head, Mapping):
+        _add_user(head.get("author"))
+
+    commits = event.get("commits")
+    if isinstance(commits, list):
+        for row in commits:
+            if isinstance(row, Mapping):
+                _add_user(row.get("author"))
+    return extras
+
+
+def load_event(path: str = "") -> dict[str, object]:
+    raw = (path or os.environ.get("GITHUB_EVENT_PATH", "")).strip()
+    if not raw:
+        return {}
+    file = Path(raw)
+    if not file.is_file():
+        return {}
+    data = json.loads(file.read_text(encoding="utf-8"))
+    return data if isinstance(data, dict) else {}
+
+
+def merged_pr_people(rows: object) -> list[dict[str, str]]:
+    extras: list[dict[str, str]] = []
+    if not isinstance(rows, list):
+        return extras
+    for row in rows:
+        if not isinstance(row, dict) or not row.get("merged_at"):
+            continue
+        user = row.get("user")
+        if not isinstance(user, dict):
+            continue
+        login = str(user.get("login") or "").strip()
+        if not login:
+            continue
+        extras.append(
+            {
+                "login": login,
+                "name": str(user.get("name") or login),
+                "type": str(user.get("type") or ""),
+            }
+        )
+    return extras
+
+
+def _person_from_login(login: str, token: str, kind: str = "") -> dict[str, str] | None:
+    if not is_human_login(login, kind):
+        return None
+    profile = _get(f"{API}/users/{login}", token)
+    name = login
+    if isinstance(profile, dict):
+        if str(profile.get("type") or "").lower() == "bot":
+            return None
+        if profile.get("name"):
+            name = str(profile["name"])
+    return {"login": login, "name": name}
+
+
+def _append_resolved(
+    people: list[dict[str, str]],
+    extras: list[dict[str, str]],
+    token: str,
+    limit: int,
+) -> list[dict[str, str]]:
+    pending: list[dict[str, str]] = []
+    seen = {person["login"].lower() for person in people}
+    for extra in extras:
+        if len(people) + len(pending) >= limit:
+            break
+        login = str(extra.get("login") or "").strip()
+        kind = str(extra.get("type") or "")
+        if not is_human_login(login, kind) or login.lower() in seen:
+            continue
+        person = _person_from_login(login, token, kind)
+        if person is None:
+            continue
+        seen.add(login.lower())
+        pending.append(person)
+    return people + pending
+
+
+def list_merged_pr_authors(
+    repo: str, token: str, limit: int
+) -> list[dict[str, str]]:
+    extras: list[dict[str, str]] = []
+    page = 1
+    while len(extras) < limit:
+        rows = _get(
+            f"{API}/repos/{repo}/pulls?state=closed&per_page=100&page={page}",
+            token,
+        )
+        extras.extend(merged_pr_people(rows))
+        if not isinstance(rows, list) or len(rows) < 100:
+            break
+        page += 1
+    return extras
+
+
 def list_people(repo: str, token: str, limit: int = 100) -> list[dict[str, str]]:
     people: list[dict[str, str]] = []
     page = 1
@@ -161,17 +318,19 @@ def list_people(repo: str, token: str, limit: int = 100) -> list[dict[str, str]]
                 continue
             login = str(row.get("login") or "")
             kind = str(row.get("type") or "")
-            if not login or kind == "Bot" or login.endswith("[bot]"):
+            person = _person_from_login(login, token, kind)
+            if person is None:
                 continue
-            profile = _get(f"{API}/users/{login}", token)
-            name = login
-            if isinstance(profile, dict) and profile.get("name"):
-                name = str(profile["name"])
-            people.append({"login": login, "name": name})
+            people.append(person)
         if len(rows) < 100:
             break
         page += 1
-    return people
+    extras = trigger_people(
+        os.environ.get("GITHUB_ACTOR", ""),
+        load_event(),
+    )
+    extras.extend(list_merged_pr_authors(repo, token, limit))
+    return _append_resolved(people, extras, token, limit)
 
 
 def fetch_avatars(

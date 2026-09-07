@@ -374,6 +374,106 @@ class FillTest(unittest.TestCase):
         self.assertEqual(self.mod.render_html([]), "")
         self.assertIn("<svg", self.mod.render_svg([]))
 
+    def test_trigger_actor_is_added_when_api_lags(self) -> None:
+        api = [{"login": "alice", "name": "Alice"}]
+        extras = self.mod.trigger_people(actor="bob")
+        people = self.mod.merge_people(api, extras, limit=48)
+        self.assertEqual(
+            people,
+            [
+                {"login": "alice", "name": "Alice"},
+                {"login": "bob", "name": "bob"},
+            ],
+        )
+
+    def test_trigger_bot_actor_is_ignored(self) -> None:
+        api = [{"login": "alice", "name": "Alice"}]
+        extras = self.mod.trigger_people(actor="github-actions[bot]")
+        people = self.mod.merge_people(api, extras, limit=48)
+        self.assertEqual(people, [{"login": "alice", "name": "Alice"}])
+
+    def test_trigger_actor_already_listed_stays_one_row(self) -> None:
+        api = [{"login": "alice", "name": "Alice"}]
+        extras = self.mod.trigger_people(actor="alice")
+        people = self.mod.merge_people(api, extras, limit=48)
+        self.assertEqual(people, [{"login": "alice", "name": "Alice"}])
+
+    def test_trigger_people_reads_pull_request_author(self) -> None:
+        extras = self.mod.trigger_people(
+            actor="owner",
+            event={"pull_request": {"user": {"login": "HeaTTap", "type": "User"}}},
+        )
+        people = self.mod.merge_people(
+            [{"login": "owner", "name": "Owner"}], extras, limit=48
+        )
+        self.assertEqual(
+            [person["login"] for person in people],
+            ["owner", "HeaTTap"],
+        )
+
+    def test_merged_pr_author_is_added_when_api_has_only_merger(self) -> None:
+        api = [{"login": "owner", "name": "Owner"}]
+        extras = self.mod.merged_pr_people(
+            [
+                {
+                    "merged_at": "2026-09-07T08:27:53Z",
+                    "user": {"login": "HeaTTap", "type": "User"},
+                }
+            ]
+        )
+        people = self.mod.merge_people(api, extras, limit=48)
+        self.assertEqual(
+            [person["login"] for person in people],
+            ["owner", "HeaTTap"],
+        )
+
+    def test_merged_pr_bots_stay_off_the_wall(self) -> None:
+        extras = self.mod.merged_pr_people(
+            [
+                {
+                    "merged_at": "2026-09-01T00:00:00Z",
+                    "user": {"login": "dependabot[bot]", "type": "Bot"},
+                },
+                {"user": {"login": "not-merged", "type": "User"}},
+            ]
+        )
+        people = self.mod.merge_people(
+            [{"login": "alice", "name": "Alice"}], extras, limit=48
+        )
+        self.assertEqual(people, [{"login": "alice", "name": "Alice"}])
+
+    def test_list_people_adds_actor_and_merged_pr_without_live_api(self) -> None:
+        def fake_get(url: str, _token: str) -> object:
+            if "/contributors" in url:
+                return [{"login": "alice", "type": "User"}]
+            if url.endswith("/users/alice"):
+                return {"name": "Alice", "type": "User"}
+            if url.endswith("/users/bob"):
+                return {"name": "Bob", "type": "User"}
+            if url.endswith("/users/HeaTTap"):
+                return {"name": "HeaTTap", "type": "User"}
+            if "/pulls?" in url:
+                return [
+                    {
+                        "merged_at": "2026-09-07T08:27:53Z",
+                        "user": {"login": "HeaTTap", "type": "User"},
+                    }
+                ]
+            raise AssertionError(url)
+
+        self.mod._get = fake_get  # type: ignore[method-assign]
+        env = {"GITHUB_ACTOR": "bob", "GITHUB_EVENT_PATH": ""}
+        with mock.patch.dict("os.environ", env, clear=False):
+            people = self.mod.list_people("owner/name", "token", limit=48)
+        self.assertEqual(
+            people,
+            [
+                {"login": "alice", "name": "Alice"},
+                {"login": "bob", "name": "Bob"},
+                {"login": "HeaTTap", "name": "HeaTTap"},
+            ],
+        )
+
     def test_contributors_repo_wins_over_github_repository(self) -> None:
         """Actions ignores GITHUB_REPOSITORY in a composite env block."""
         seen: list[str] = []
