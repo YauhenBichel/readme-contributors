@@ -49,8 +49,6 @@ class FillTest(unittest.TestCase):
         self.assertIn("The wall is still the people the contributors API lists", text)
         self.assertIn("Zero-config leaves the wall with no caption", text)
         self.assertIn("Filled from the GitHub contributors API", text)
-        self.assertIn("Stale files are removed when a login leaves the wall", text)
-        self.assertIn("Contributor and closed-PR lists are paged up to that cap", text)
         self.assertIn("## Examples", text)
         self.assertIn("## Used by", text)
         self.assertIn("YauhenBichel/py-harness", text)
@@ -81,6 +79,7 @@ class FillTest(unittest.TestCase):
             path = ROOT / "docs" / name
             self.assertTrue(path.is_file(), name)
             self.assertIn("<svg", path.read_text(encoding="utf-8"))
+        self.assertIn("Contributor and closed-PR lists are paged up to that cap", text)
 
     def test_svg_facepile_clips_to_a_circle(self) -> None:
         svg = self.mod.render_svg(

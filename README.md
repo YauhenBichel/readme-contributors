@@ -360,7 +360,7 @@ No token, no GPU, no extra packages. `fill.py` is stdlib only.
 | --- | --- | --- |
 | `readme` | `README.md` | File that holds the markers |
 | `svg` | `.github/contributors.svg` | Generated wall (when `format` is `svg`) |
-| `faces` | `.github/faces` | One polaroid SVG per person. Stale files are removed when a login leaves the wall |
+| `faces` | `.github/faces` | One polaroid SVG per person |
 | `format` | `svg` | README icons always link to profiles; `html` skips the combined SVG file |
 | `layout` | `auto` | `auto` picks facepile / grid / compact by count; or pin `facepile`, `stickers`, `grid`, `tiles`, `list`, `compact`, `wave`, `orbit`, `honeycomb`, `ribbon`, `constellation`, `banner` |
 | `theme` | `auto` | `auto`, `github`, `midnight`, `sunrise`, `forest`, `ocean`, `mono` |
