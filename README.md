@@ -100,6 +100,7 @@ other repositories get.
   <a href="https://github.com/Aditya-233" title="Aditya" aria-label="Aditya"><img src=".github/faces/Aditya-233.svg" width="63" height="72" alt="Aditya" /></a>
   <a href="https://github.com/kkkhs" title="Huangshuo Kuang" aria-label="Huangshuo Kuang"><img src=".github/faces/kkkhs.svg" width="76" height="87" alt="Huangshuo Kuang" /></a>
 </p>
+<p align="center"><em>The contributors wall showcases the efforts of 6 dedicated individuals.</em></p>
 <!-- demo: live -end -->
 
 Examples for every layout live on the
@@ -345,6 +346,7 @@ Thank you to everyone who has helped this Action.
   <a href="https://github.com/YauhenBichel" title="Yauhen Bichel" aria-label="Yauhen Bichel"><img src=".github/faces/YauhenBichel.svg" width="87" height="99" alt="Yauhen Bichel" /></a>
   <a href="https://github.com/HeaTTap" title="HeaTTap" aria-label="HeaTTap"><img src=".github/faces/HeaTTap.svg" width="66" height="75" alt="HeaTTap" /></a>
 </p>
+<p align="center"><em>The contributors wall showcases the efforts of two dedicated individuals.</em></p>
 <!-- readme: contributors,bots/- -end -->
 
 Filled from GitHub commits (bots omitted).
