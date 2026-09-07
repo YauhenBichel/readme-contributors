@@ -24,8 +24,9 @@ service.
 
 ## What
 
-A **GitHub Action** that fills a README with the people who actually
-committed. Each person is a **polaroid**: face, name, a bit of tilt.
+A **GitHub Action** that fills a README with the people the GitHub
+contributors API lists (plus merged-PR authors when that list is
+behind). Each person is a **polaroid**: face, name, a bit of tilt.
 Each card is its own link. Bots are omitted. `exclude` drops named
 logins. Merged PR `Co-authored-by` trailers join the wall. An empty
 list writes “Be the first to appear here.” Hover a cut name to see
@@ -286,7 +287,8 @@ jobs:
 A copy-paste workflow that opens a pull request on a protected default
 branch is in [examples/contributors.yml](./examples/contributors.yml).
 The Action only writes files in the workspace. Your workflow decides
-whether to commit them.
+whether to commit them. The full case list is on the
+[site](https://yauhenbichel.github.io/readme-contributors/#cases).
 
 ### Use a model
 
@@ -297,8 +299,11 @@ copy [examples/contributors-openai.yml](./examples/contributors-openai.yml).
 
 21 seconds. The people stay. The model adds one sentence.
 
-**What.** The wall is still the people who committed. The model writes
-one italic line that names this repository or those people.
+This is the model path. Zero-config leaves the wall with no caption.
+
+**What.** The wall is still the people the contributors API lists. The
+model writes one italic line that names this repository or those
+people.
 
 **Why.** A headcount is not a story. A caption that says who showed
 up is.
@@ -399,4 +404,4 @@ Thank you to everyone who has helped this Action.
 <p align="center"><em>Yauhen Bichel and HeaTTap have contributed to the readme-contributors project.</em></p>
 <!-- readme: contributors,bots/- -end -->
 
-Filled from GitHub commits (bots omitted).
+Filled from the GitHub contributors API (bots omitted).

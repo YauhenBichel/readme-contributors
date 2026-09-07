@@ -40,7 +40,7 @@ If that list is empty, these three are ready:
 
 1. Make face overlap an optional `overlap` input (today it is `0.64` in `render_svg`).
 2. When the README markers are missing, print both comments so they can be pasted.
-3. Document a protected-main workflow that opens a pull request instead of pushing.
+3. Delete orphan `.github/faces/*.svg` files when a login leaves the wall.
 
 Design questions go in the issue thread.
 

@@ -46,7 +46,9 @@ class FillTest(unittest.TestCase):
         self.assertIn("## How", text)
         self.assertIn("### Keep credits low", text)
         self.assertIn("readme-contributors-ai-demo.gif", text)
-        self.assertIn("The wall is still the people who committed", text)
+        self.assertIn("The wall is still the people the contributors API lists", text)
+        self.assertIn("Zero-config leaves the wall with no caption", text)
+        self.assertIn("Filled from the GitHub contributors API", text)
         self.assertIn("## Examples", text)
         self.assertIn("## Used by", text)
         self.assertIn("YauhenBichel/py-harness", text)
@@ -319,6 +321,14 @@ class FillTest(unittest.TestCase):
         self.assertIn("format: html", text)
         self.assertIn("caption: auto", text)
         self.assertIn("secrets.OPENAI_API_KEY", text)
+        self.assertIn(".github/faces", text)
+        self.assertNotIn("git push\n", text.replace("git push --force", ""))
+
+    def test_example_workflow_opens_a_pull_request(self) -> None:
+        text = (ROOT / "examples" / "contributors.yml").read_text(encoding="utf-8")
+        self.assertIn("gh pr create", text)
+        self.assertIn("gh pr merge", text)
+        self.assertIn("pull-requests: write", text)
         self.assertIn(".github/faces", text)
         self.assertNotIn("git push\n", text.replace("git push --force", ""))
 
