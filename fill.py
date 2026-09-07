@@ -10,6 +10,7 @@ drawing; they do not change who is listed.
 from __future__ import annotations
 
 import base64
+import html
 import json
 import math
 import os
@@ -35,6 +36,8 @@ _GITHUB_NOREPLY = re.compile(
 _LOGIN_TOKEN = re.compile(
     r"^@?(?P<login>[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?)\b"
 )
+_CAPTION_EM = re.compile(r"<em>(.*?)</em>", re.I | re.S)
+_WALL_HREF = re.compile(r'href="https://github.com/([^"#?]+)"', re.I)
 _UNSAFE = (
     "nsfw",
     "porn",
@@ -1372,6 +1375,70 @@ def caption_is_specific(
     return any(needle in low for needle in needles)
 
 
+def marked_block(text: str) -> str:
+    start = _start()
+    end = _end()
+    fences = _fence_spans(text)
+    pos = 0
+    while True:
+        i = text.find(start, pos)
+        if i < 0:
+            return ""
+        j = text.find(end, i + len(start))
+        if j < 0:
+            return ""
+        if not _in_span(i, fences):
+            return text[i + len(start) : j]
+        pos = i + len(start)
+
+
+def existing_caption(block: str) -> str:
+    match = _CAPTION_EM.search(block or "")
+    if not match:
+        return ""
+    return html.unescape(match.group(1)).strip()
+
+
+def wall_logins(block: str) -> set[str]:
+    found: set[str] = set()
+    for raw in _WALL_HREF.findall(block or ""):
+        login = html.unescape(raw).strip().lower()
+        if login:
+            found.add(login)
+    return found
+
+
+def people_logins(people: list[dict[str, str]]) -> set[str]:
+    found: set[str] = set()
+    for person in people:
+        login = str(person.get("login") or "").strip().lower()
+        if login:
+            found.add(login)
+    return found
+
+
+def roster_matches(people: list[dict[str, str]], block: str) -> bool:
+    return people_logins(people) == wall_logins(block)
+
+
+def resolve_caption(
+    people: list[dict[str, str]], repo: str, readme: str = ""
+) -> str:
+    wanted = os.environ.get("CAPTION", "").strip()
+    if wanted.lower() != "auto":
+        return wanted
+    if not people:
+        return ""
+    if readme:
+        block = marked_block(readme)
+        if roster_matches(people, block):
+            line = existing_caption(block)
+            if caption_is_specific(line, people, repo):
+                print("caption reused", file=sys.stderr)
+                return line
+    return ask_caption(people, repo)
+
+
 def ask_caption(people: list[dict[str, str]], repo: str = "") -> str:
     wanted = os.environ.get("CAPTION", "").strip()
     if wanted.lower() != "auto":
@@ -1404,7 +1471,7 @@ def ask_caption(people: list[dict[str, str]], repo: str = "") -> str:
             key,
             {
                 "model": model,
-                "temperature": 0.4,
+                "temperature": 0,
                 "max_tokens": 80,
                 "messages": [
                     {"role": "system", "content": system},
@@ -1503,6 +1570,7 @@ def main() -> int:
     faces_href = Path(os.path.relpath(faces_dir, start=readme.parent)).as_posix()
     if not faces_href.startswith("."):
         faces_href = f"./{faces_href}"
+    readme_text = readme.read_text(encoding="utf-8")
     block = render_wall(
         people,
         svg_href=href,
@@ -1510,9 +1578,9 @@ def main() -> int:
         size=size,
         format=fmt,
         faces_href=faces_href,
-        caption=ask_caption(people, repo=repo),
+        caption=resolve_caption(people, repo, readme_text),
     )
-    updated = apply_readme(readme.read_text(encoding="utf-8"), block)
+    updated = apply_readme(readme_text, block)
     same_readme = updated == readme.read_text(encoding="utf-8")
     same_svg = True
     if fmt == "svg":
