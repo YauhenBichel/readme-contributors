@@ -1375,9 +1375,6 @@ def caption_is_specific(
     return any(needle in low for needle in needles)
 
 
-<<<<<<< Updated upstream
-def ask_caption(people: list[dict[str, str]], repo: str = "") -> str:
-=======
 def marked_block(text: str) -> str:
     start = _start()
     end = _end()
@@ -1427,14 +1424,11 @@ def roster_matches(people: list[dict[str, str]], block: str) -> bool:
 def resolve_caption(
     people: list[dict[str, str]], repo: str, readme: str = ""
 ) -> str:
->>>>>>> Stashed changes
     wanted = os.environ.get("CAPTION", "").strip()
     if wanted.lower() != "auto":
         return wanted
     if not people:
         return ""
-<<<<<<< Updated upstream
-=======
     if readme:
         block = marked_block(readme)
         if roster_matches(people, block):
@@ -1451,7 +1445,6 @@ def ask_caption(people: list[dict[str, str]], repo: str = "") -> str:
         return wanted
     if not people:
         return ""
->>>>>>> Stashed changes
     cfg = model_settings()
     if not cfg:
         return ""
@@ -1478,11 +1471,7 @@ def ask_caption(people: list[dict[str, str]], repo: str = "") -> str:
             key,
             {
                 "model": model,
-<<<<<<< Updated upstream
-                "temperature": 0.4,
-=======
                 "temperature": 0,
->>>>>>> Stashed changes
                 "max_tokens": 80,
                 "messages": [
                     {"role": "system", "content": system},
@@ -1589,11 +1578,7 @@ def main() -> int:
         size=size,
         format=fmt,
         faces_href=faces_href,
-<<<<<<< Updated upstream
-        caption=ask_caption(people, repo=repo),
-=======
         caption=resolve_caption(people, repo, readme_text),
->>>>>>> Stashed changes
     )
     updated = apply_readme(readme_text, block)
     same_readme = updated == readme.read_text(encoding="utf-8")

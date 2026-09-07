@@ -308,9 +308,6 @@ Live on this README:
 
 Pin that SHA until the next release. `@v1.7.0` can call a model but
 only sees a headcount. Stock “dedicated individuals” lines are
-<<<<<<< Updated upstream
-dropped. A missing key or a 429 leaves no caption.
-=======
 dropped. A missing key or a 429 leaves no caption — it is not
 retried.
 
@@ -322,7 +319,6 @@ people plus a missing or stock line gets one call. Use
 `gpt-4o-mini`. One secret, one `caption: auto` step, weekly cron
 only. Do not run `caption: auto` on `push` to `README.md` or the
 wording will refresh itself.
->>>>>>> Stashed changes
 
 ## Contribute
 
@@ -352,11 +348,7 @@ No token, no GPU, no extra packages. `fill.py` is stdlib only.
 | `avatar-size` | `72` | Face diameter, pixels |
 | `max` | `100` | Cap after bots are omitted. `0` means 500 |
 | `exclude` | empty | Comma-separated logins to omit (case-insensitive, after bots) |
-<<<<<<< Updated upstream
-| `caption` | empty | `auto` writes one sentence that names the repo or people when a model key is set |
-=======
 | `caption` | empty | `auto` writes one sentence that names the repo or people when a model key is set. A still-valid line is reused when the people list is unchanged |
->>>>>>> Stashed changes
 | `model` | empty | Optional OpenAI-compatible chat model for `caption: auto` |
 | `model-api-key` | empty | Optional OpenAI-compatible key |
 | `model-base-url` | empty | Optional OpenAI-compatible API root |

@@ -481,28 +481,6 @@ class FillTest(unittest.TestCase):
         wall = self.mod.render_wall(
             [{"login": "alice", "name": "Alice"}],
             caption="Twelve people keep py-harness honest.",
-<<<<<<< Updated upstream
-        )
-        self.assertIn("Twelve people keep py-harness honest.", wall)
-        self.assertEqual(self.mod.ask_caption(people[:3]), "")
-        self.assertFalse(
-            self.mod.caption_is_specific(
-                "The contributors wall showcases the efforts of 2 dedicated individuals.",
-                people[:2],
-                "YauhenBichel/readme-contributors",
-            )
-        )
-        self.assertTrue(
-            self.mod.caption_is_specific(
-                "Yauhen Bichel and HeaTTap keep readme-contributors current.",
-                [
-                    {"login": "YauhenBichel", "name": "Yauhen Bichel"},
-                    {"login": "HeaTTap", "name": "HeaTTap"},
-                ],
-                "YauhenBichel/readme-contributors",
-            )
-        )
-=======
         )
         self.assertIn("Twelve people keep py-harness honest.", wall)
         self.assertEqual(self.mod.ask_caption(people[:3]), "")
@@ -591,7 +569,6 @@ class FillTest(unittest.TestCase):
                 "Yauhen Bichel ships readme-contributors.",
             )
             self.assertEqual(len(seen), 2)
->>>>>>> Stashed changes
 
     def test_trigger_actor_is_added_when_api_lags(self) -> None:
         api = [{"login": "alice", "name": "Alice"}]

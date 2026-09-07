@@ -52,14 +52,9 @@ inputs:
     description: >
       Optional line under the wall. Empty (default) writes none. auto
       writes one sentence that names the repository or people when a
-<<<<<<< Updated upstream
-      model key is set. Generic filler is dropped. Any other value is
-      used as-is.
-=======
       model key is set. A still-valid line is reused (no second call)
       when the people list is unchanged. Generic filler is dropped.
       Any other value is used as-is.
->>>>>>> Stashed changes
     required: false
     default: ""
   model:

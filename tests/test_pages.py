@@ -23,13 +23,10 @@ class PagesTest(unittest.TestCase):
         self.assertIn("theme: midnight", text)
         self.assertIn("id=\"used-by\"", text)
         self.assertIn("id=\"model\"", text)
-<<<<<<< Updated upstream
-=======
         self.assertIn("id=\"credits\"", text)
         self.assertIn("Keep credits low", text)
         self.assertIn("weekly cron only", text)
         self.assertIn("The contributors to the py-harness project include", text)
->>>>>>> Stashed changes
         self.assertIn("examples/contributors-openai.yml", text)
         self.assertIn("OPENAI_API_KEY", text)
         self.assertIn("e4468b5b0cc0f8b87f0b083bc13efc9289ff7ecd", text)
