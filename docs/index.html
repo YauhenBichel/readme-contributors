@@ -362,6 +362,7 @@
         <a href="#demo">Video</a>
         <a href="#live">Live demo</a>
         <a href="#use">How</a>
+        <a href="#model">Model</a>
         <a href="#used-by">Examples</a>
         <a href="#layouts">Layouts</a>
         <a href="https://github.com/marketplace/actions/readme-contributors">Marketplace</a>
@@ -543,6 +544,34 @@ jobs:
         Set <code>exclude</code> to omit logins. An empty wall writes
         “Be the first to appear here.” <code>caption: auto</code> writes one
         sentence that names the repository or the people on the wall.
+      </p>
+    </section>
+
+    <section>
+      <h2 id="model">Use a model on your repo</h2>
+      <p class="note">
+        The wall stays rule-based. The model only writes the italic line under
+        the faces. Live on this README now:
+      </p>
+      <p><em>The contributors to the py-harness project include Yauhen Bichel, Mark Xian, Itzsaurav, svkzn, Aditya, and Huangshuo Kuang.</em></p>
+      <p><em>Yauhen Bichel and HeaTTap have contributed to the readme-contributors project.</em></p>
+      <ol>
+        <li>Add the README markers from <a href="#use">How to use it</a>.</li>
+        <li>Settings → Secrets and variables → Actions → New repository secret named <code>OPENAI_API_KEY</code>.</li>
+        <li>Copy <a href="https://github.com/YauhenBichel/readme-contributors/blob/main/examples/contributors-openai.yml">examples/contributors-openai.yml</a>.</li>
+        <li>Run the workflow. The log prints <code>caption: …</code> when a line is kept.</li>
+      </ol>
+      <pre>- uses: YauhenBichel/readme-contributors@e4468b5b0cc0f8b87f0b083bc13efc9289ff7ecd
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    caption: auto
+    model: gpt-4o-mini
+    model-api-key: ${{ secrets.OPENAI_API_KEY }}</pre>
+      <p class="note">
+        Pin that SHA until the next release. <code>@v1.7.0</code> can call a
+        model but only sees a headcount, so it writes filler. Stock
+        “dedicated individuals” lines are dropped. A missing key or a 429
+        leaves the wall with no caption.
       </p>
     </section>
 

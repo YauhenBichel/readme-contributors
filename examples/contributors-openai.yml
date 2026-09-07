@@ -1,0 +1,48 @@
+# Same wall as examples/contributors.yml, plus one sentence that names
+# this repository or the people on it.
+#
+# Settings → Secrets → Actions → New repository secret:
+#   Name: OPENAI_API_KEY
+#   Value: your OpenAI (or OpenAI-compatible) key
+#
+# README must already have:
+#   <!-- readme: contributors,bots/- -start -->
+#   <!-- readme: contributors,bots/- -end -->
+#
+# Pin this SHA until the next readme-contributors release. @v1.7.0 can
+# call a model, but it only sees a headcount and writes filler.
+
+name: Contributors
+
+on:
+  schedule:
+    - cron: "17 4 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  readme:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: true
+
+      - uses: YauhenBichel/readme-contributors@e4468b5b0cc0f8b87f0b083bc13efc9289ff7ecd # specific captions
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          caption: auto
+          model: gpt-4o-mini
+          model-api-key: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Push the list
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add README.md .github/contributors.svg .github/faces
+          git diff --cached --quiet && exit 0
+          git commit -m "docs: refresh README contributors"
+          git push
