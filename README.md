@@ -13,8 +13,10 @@ A **GitHub Action** that draws a **contributors** wall into your
 **README**: one clickable **polaroid sticker** per person (face plus
 name), plus SVG layouts for Pages (facepile, stickers, grid, tiles,
 orbit, honeycomb, and more). It reads the GitHub contributors API,
-omits bots, and replaces a pair of HTML markers. No `<table>`, so
-GitHub does not draw a grid. No third-party list service.
+adds the person who just landed and merged pull request authors
+when that list is behind, omits bots, and replaces a pair of HTML
+markers. No `<table>`, so GitHub does not draw a grid. No
+third-party list service.
 
 [![18s demo](./docs/media/readme-contributors-demo.gif)](https://yauhenbichel.github.io/readme-contributors/#demo)
 
