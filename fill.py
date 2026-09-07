@@ -144,7 +144,7 @@ def _bytes(url: str, token: str) -> bytes:
         return resp.read()
 
 
-def list_people(repo: str, token: str, limit: int = 48) -> list[dict[str, str]]:
+def list_people(repo: str, token: str, limit: int = 100) -> list[dict[str, str]]:
     people: list[dict[str, str]] = []
     page = 1
     while len(people) < limit:
@@ -221,11 +221,35 @@ def _data_uri(payload: bytes) -> str:
 
 
 def parse_layout(raw: str) -> str:
-    name = (raw or "facepile").strip().lower() or "facepile"
+    name = (raw or "auto").strip().lower() or "auto"
+    if name == "auto":
+        return "auto"
     if name not in LAYOUTS:
-        allowed = ", ".join(LAYOUTS)
+        allowed = "auto, " + ", ".join(LAYOUTS)
         raise SystemExit(f"layout must be one of: {allowed}")
     return name
+
+
+def fit_layout(layout: str, count: int) -> str:
+    """Pages SVG. auto picks a layout that still shows every face."""
+    chosen = parse_layout(layout)
+    if chosen != "auto":
+        return chosen
+    if count <= 8:
+        return "facepile"
+    if count <= 24:
+        return "grid"
+    return "compact"
+
+
+def fit_readme_size(count: int, size: int) -> int:
+    """README polaroids shrink so a long list still wraps on GitHub."""
+    size = max(32, size)
+    if count <= 20:
+        return size
+    if count <= 50:
+        return min(size, 48)
+    return min(size, 36)
 
 
 def parse_theme(raw: str) -> str:
@@ -588,7 +612,7 @@ def render_svg(
     theme: str = "auto",
 ) -> str:
     """Draw the wall. Each face is a link to that person's GitHub profile."""
-    layout = parse_layout(layout)
+    layout = fit_layout(layout, len(people))
     theme_name = parse_theme(theme)
     palette = THEMES[theme_name]
     if not people:
@@ -905,8 +929,15 @@ def render_wall(
 ) -> str:
     # GitHub renders <img src="*.svg"> as one picture. The README wall is
     # one polaroid <a><img></a> per person so every face stays a link.
+    # From 12 people up, also print names so a small face still has credit.
     _ = (svg_href, svg_width, format)
-    return render_html(people, size=size, faces_href=faces_href)
+    count = len(people)
+    html = render_html(
+        people, size=fit_readme_size(count, size), faces_href=faces_href
+    )
+    if count >= 12:
+        html += render_names(people)
+    return html
 
 
 def svg_width(
@@ -918,7 +949,7 @@ def svg_width(
 ) -> int:
     if not people:
         return 1
-    layout = parse_layout(layout)
+    layout = fit_layout(layout, len(people))
     theme_name = parse_theme(theme)
     framed = bool(THEMES[theme_name].get("bg"))
     width, _height, _spots = _placements(
@@ -1001,13 +1032,16 @@ def main() -> int:
     fmt = os.environ.get("FORMAT", "svg").strip().lower() or "svg"
     columns = _int_env("COLUMNS", 8)
     size = _int_env("AVATAR_SIZE", 72)
-    limit = _int_env("MAX_PEOPLE", 48)
-    layout = parse_layout(os.environ.get("LAYOUT", "facepile"))
+    limit = _int_env("MAX_PEOPLE", 100)
+    if limit <= 0:
+        limit = 500
+    wanted_layout = os.environ.get("LAYOUT", "auto")
     theme = parse_theme(os.environ.get("THEME", "auto"))
     check = os.environ.get("CHECK", "").strip().lower() in {"1", "true", "yes"}
     if not repo:
         raise SystemExit("GITHUB_REPOSITORY is required (owner/name)")
     people = list_people(repo, token, limit)
+    layout = fit_layout(wanted_layout, len(people))
     faces_dir = root / os.environ.get("FACES_PATH", ".github/faces")
     avatars: dict[str, bytes] = fetch_avatars(people, token, size) if people else {}
     href = ""
