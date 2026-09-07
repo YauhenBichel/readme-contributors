@@ -43,6 +43,10 @@ GitHub profile.
 
 ```markdown
 <!-- readme: contributors,bots/- -start -->
+<p align="center">
+  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src=".github/faces/YauhenBichel.svg" width="87" height="99" alt="Yauhen Bichel" /></a>
+  <a href="https://github.com/HeaTTap" title="HeaTTap"><img src=".github/faces/HeaTTap.svg" width="66" height="75" alt="HeaTTap" /></a>
+</p>
 <!-- readme: contributors,bots/- -end -->
 ```
 
