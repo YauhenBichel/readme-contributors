@@ -275,10 +275,10 @@ class FillTest(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("gh pr create", text)
+        self.assertIn("gh pr merge", text)
         self.assertIn("pull-requests: write", text)
         self.assertIn("format: html", text)
         self.assertIn(".github/faces", text)
-        self.assertIn("Actions cannot open a pull request", text)
         self.assertNotIn("git push\n", text.replace("git push --force", ""))
 
     def test_display_names_are_escaped(self) -> None:
@@ -295,6 +295,27 @@ class FillTest(unittest.TestCase):
         text = f"before\n{start}\nold\n{end}\nafter\n"
         out = self.mod.apply_readme(text, "new\n")
         self.assertEqual(out, f"before\n{start}\nnew\n{end}\nafter\n")
+
+    def test_apply_readme_skips_markers_inside_a_code_fence(self) -> None:
+        start = self.mod.DEFAULT_START
+        end = self.mod.DEFAULT_END
+        text = (
+            "## How\n"
+            "\n"
+            "```markdown\n"
+            f"{start}\n"
+            f"{end}\n"
+            "```\n"
+            "\n"
+            "## Contributors\n"
+            f"{start}\n"
+            "old\n"
+            f"{end}\n"
+        )
+        out = self.mod.apply_readme(text, "new\n")
+        self.assertIn("```markdown\n" + start + "\n" + end + "\n```", out)
+        self.assertIn(f"{start}\nnew\n{end}", out)
+        self.assertNotIn("old", out)
 
     def test_apply_readme_missing_markers_exits_with_example(self) -> None:
         start = self.mod.DEFAULT_START
