@@ -1,6 +1,6 @@
 # The two lines a repo that already has a Contributors job should swap in.
 #
-#   - uses: YauhenBichel/readme-contributors@635c6ff57a4c155e285b6efa75df3c3b0da7f1df # v1.5.1
+#   - uses: YauhenBichel/readme-contributors@efb37982d140840e9698014f756d9345ceb3ab4c # v1.6.0
 #     with:
 #       token: ${{ secrets.GITHUB_TOKEN }}
 #

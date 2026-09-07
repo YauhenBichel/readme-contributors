@@ -306,6 +306,7 @@ class FillTest(unittest.TestCase):
         )
         self.assertIn("gh pr create", text)
         self.assertIn("gh pr merge", text)
+        self.assertNotIn("--jq .number", text)
         self.assertIn("pull-requests: write", text)
         self.assertIn("format: html", text)
         self.assertIn(".github/faces", text)
