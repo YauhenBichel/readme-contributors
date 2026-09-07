@@ -310,6 +310,7 @@ class FillTest(unittest.TestCase):
         )
         self.assertIn("gh pr create", text)
         self.assertIn("gh pr merge", text)
+        self.assertIn('gh pr merge "$NUMBER" --squash --auto || gh pr merge "$NUMBER" --squash', text)
         self.assertNotIn("--jq .number", text)
         self.assertIn("pull-requests: write", text)
         self.assertIn("format: html", text)
