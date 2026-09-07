@@ -132,6 +132,7 @@ Set `layout`. The default is `auto`: **facepile** up to 8 people,
 clickable polaroids. Faces shrink at 20 and 50 people so the row still
 wraps. From 12 people up, a name list sits under the faces so every
 person stays a link. `max` defaults to 100 (set `0` for up to 500).
+Contributor and closed-PR lists are paged up to that cap.
 `layout` still changes the SVG drawn for Pages.
 
 **stickers** — tilted cards with a chunky ring and a drop shadow.
@@ -365,7 +366,7 @@ No token, no GPU, no extra packages. `fill.py` is stdlib only.
 | `theme` | `auto` | `auto`, `github`, `midnight`, `sunrise`, `forest`, `ocean`, `mono` |
 | `columns` | `8` | Faces per row |
 | `avatar-size` | `72` | Face diameter, pixels |
-| `max` | `100` | Cap after bots are omitted. `0` means 500 |
+| `max` | `100` | Cap after bots are omitted. `0` means 500. Contributor and closed-PR lists are paged up to the cap |
 | `exclude` | empty | Comma-separated logins to omit (case-insensitive, after bots) |
 | `caption` | empty | `auto` writes one sentence that names the repo or people when a model key is set. A still-valid line is reused when the people list is unchanged |
 | `model` | empty | Optional OpenAI-compatible chat model for `caption: auto` |

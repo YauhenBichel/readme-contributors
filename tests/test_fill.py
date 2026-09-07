@@ -49,6 +49,7 @@ class FillTest(unittest.TestCase):
         self.assertIn("The wall is still the people the contributors API lists", text)
         self.assertIn("Zero-config leaves the wall with no caption", text)
         self.assertIn("Filled from the GitHub contributors API", text)
+        self.assertIn("Contributor and closed-PR lists are paged up to that cap", text)
         self.assertIn("## Examples", text)
         self.assertIn("## Used by", text)
         self.assertIn("YauhenBichel/py-harness", text)
@@ -685,6 +686,69 @@ class FillTest(unittest.TestCase):
                 {"login": "cara", "name": "Cara"},
             ],
         )
+
+    def test_merged_prs_follow_second_page_for_another_author(self) -> None:
+        def fake_get(url: str, _token: str) -> object:
+            if "/contributors" in url:
+                if url.endswith("page=2"):
+                    return []
+                return [{"login": "owner", "type": "User"}]
+            if url.endswith("/users/owner"):
+                return {"name": "Owner", "type": "User"}
+            if url.endswith("/users/HeaTTap"):
+                return {"name": "HeaTTap", "type": "User"}
+            if "/pulls?" in url:
+                if url.endswith("page=1"):
+                    return [
+                        {
+                            "merged_at": "2026-09-01T00:00:00Z",
+                            "user": {"login": "owner", "type": "User"},
+                        }
+                    ] * 100
+                if url.endswith("page=2"):
+                    return [
+                        {
+                            "merged_at": "2026-09-07T08:27:53Z",
+                            "user": {"login": "HeaTTap", "type": "User"},
+                        }
+                    ]
+                return []
+            raise AssertionError(url)
+
+        self.mod._get = fake_get  # type: ignore[method-assign]
+        with mock.patch.dict(
+            "os.environ", {"GITHUB_ACTOR": "", "GITHUB_EVENT_PATH": ""}, clear=False
+        ):
+            people = self.mod.list_people("owner/name", "token", limit=100)
+        self.assertEqual(
+            [person["login"] for person in people],
+            ["owner", "HeaTTap"],
+        )
+
+    def test_contributors_follows_second_page(self) -> None:
+        def fake_get(url: str, _token: str) -> object:
+            if "/contributors" in url:
+                if url.endswith("page=1"):
+                    return [{"login": f"u{i}", "type": "User"} for i in range(100)]
+                if url.endswith("page=2"):
+                    return [{"login": "HeaTTap", "type": "User"}]
+                return []
+            if "/users/" in url:
+                login = url.rsplit("/", 1)[-1]
+                return {"name": login, "type": "User"}
+            if "/pulls?" in url:
+                return []
+            raise AssertionError(url)
+
+        self.mod._get = fake_get  # type: ignore[method-assign]
+        with mock.patch.dict(
+            "os.environ", {"GITHUB_ACTOR": "", "GITHUB_EVENT_PATH": ""}, clear=False
+        ):
+            people = self.mod.list_people("owner/name", "token", limit=101)
+        logins = [person["login"] for person in people]
+        self.assertEqual(len(logins), 101)
+        self.assertEqual(logins[0], "u0")
+        self.assertEqual(logins[-1], "HeaTTap")
 
     def test_contributors_repo_wins_over_github_repository(self) -> None:
         """Actions ignores GITHUB_REPOSITORY in a composite env block."""
