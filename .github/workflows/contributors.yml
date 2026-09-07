@@ -66,4 +66,6 @@ jobs:
               --body "Filled by this Action so the wall stays current."
             NUMBER="$(gh pr list --head docs/contributors --state open --json number -q '.[0].number')"
           fi
-          gh pr merge "$NUMBER" --squash --auto
+          # --auto needs Settings → Pull requests → Allow auto-merge.
+          # This repo may not have that, so fall back to a squash now.
+          gh pr merge "$NUMBER" --squash --auto || gh pr merge "$NUMBER" --squash
