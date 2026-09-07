@@ -253,6 +253,20 @@
     .film::after { right: 7px; }
     .demo { overflow: hidden; border-radius: 10px; }
     .demo video { display: block; width: 100%; height: auto; background: #010409; }
+    .shot {
+      margin: 16px 0 0;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--card);
+    }
+    .shot img { display: block; width: 100%; height: auto; }
+    .shot figcaption {
+      margin: 0;
+      padding: 12px 14px 14px;
+      color: var(--mute);
+      font-size: 0.92rem;
+    }
     .used { display: grid; gap: 12px; margin: 16px 0; }
     @media (min-width: 720px) { .used { grid-template-columns: 1fr 1fr 1fr; } }
     .used a {
@@ -362,6 +376,7 @@
         <a href="#demo">Video</a>
         <a href="#live">Live demo</a>
         <a href="#use">How</a>
+        <a href="#ai">AI</a>
         <a href="#model">Model</a>
         <a href="#credits">Credits</a>
         <a href="#used-by">Examples</a>
@@ -391,6 +406,7 @@
     <div class="actions">
       <a class="btn primary" href="#live">Tap a card</a>
       <a class="btn" href="#demo">Watch 18s</a>
+      <a class="btn" href="#ai">Watch AI</a>
       <a class="btn" href="#use">Copy the workflow</a>
       <a class="btn" href="https://github.com/marketplace/actions/readme-contributors">Marketplace</a>
     </div>
@@ -460,6 +476,35 @@
       <p class="note">
         Same wall as the live cards above. 18 seconds. No voiceover.
       </p>
+    </section>
+
+    <section>
+      <h2 id="ai">Watch the AI demo</h2>
+      <div class="film">
+        <div class="demo">
+          <video
+            controls
+            playsinline
+            preload="metadata"
+            poster="./media/readme-contributors-ai-demo-poster.png"
+            src="./media/readme-contributors-ai-demo.mp4"
+            width="920"
+          >
+            21 second demo of the AI caption.
+            <a href="./media/readme-contributors-ai-demo.mp4">Download the MP4</a>
+          </video>
+        </div>
+      </div>
+      <p class="note">The wall is still the people who committed. One polaroid per person. The model adds one italic sentence that names this repository or those people. A headcount is not a story. A caption that says who showed up is.</p>
+      <p class="note"><strong>What.</strong> The wall is still the people who committed. The model writes one italic line that names this repository or those people.</p>
+      <p class="note"><strong>Why.</strong> A headcount is not a story. A caption that says who showed up is.</p>
+      <p class="note"><strong>How.</strong> <code>caption: auto</code> and <code>gpt-4o-mini</code>. Same people next week? The line is reused. No extra credits.</p>
+      <figure class="shot">
+        <a href="https://github.com/YauhenBichel/readme-contributors#live-demo">
+          <img src="./media/readme-contributors-ai-real.png" width="1600" height="605" alt="Live polaroid wall and model caption on the readme-contributors README">
+        </a>
+        <figcaption>Live on the Action README. <em>The contributors to the py-harness project include Yauhen Bichel, Mark Xian, Itzsaurav, svkzn, Aditya, and Huangshuo Kuang.</em></figcaption>
+      </figure>
     </section>
 
     <section>

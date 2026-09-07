@@ -292,6 +292,20 @@ whether to commit them.
 
 The wall stays rule-based. Add repository secret `OPENAI_API_KEY` and
 copy [examples/contributors-openai.yml](./examples/contributors-openai.yml).
+
+[![AI demo](./docs/media/readme-contributors-ai-demo.gif)](https://yauhenbichel.github.io/readme-contributors/#ai)
+
+21 seconds. The people stay. The model adds one sentence.
+
+**What.** The wall is still the people who committed. The model writes
+one italic line that names this repository or those people.
+
+**Why.** A headcount is not a story. A caption that says who showed
+up is.
+
+**How.** `caption: auto` and `gpt-4o-mini`. Same people next week?
+The line is reused. No extra credits.
+
 Live on this README:
 
 - *The contributors to the py-harness project include Yauhen Bichel, Mark Xian, Itzsaurav, svkzn, Aditya, and Huangshuo Kuang.*

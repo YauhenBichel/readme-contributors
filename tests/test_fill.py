@@ -45,6 +45,8 @@ class FillTest(unittest.TestCase):
         self.assertIn("## Why", text)
         self.assertIn("## How", text)
         self.assertIn("### Keep credits low", text)
+        self.assertIn("readme-contributors-ai-demo.gif", text)
+        self.assertIn("The wall is still the people who committed", text)
         self.assertIn("## Examples", text)
         self.assertIn("## Used by", text)
         self.assertIn("YauhenBichel/py-harness", text)
