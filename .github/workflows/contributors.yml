@@ -60,9 +60,9 @@ jobs:
           git push --force --set-upstream origin docs/contributors
           NUMBER="$(gh pr list --head docs/contributors --state open --json number -q '.[0].number')"
           if [ -z "$NUMBER" ]; then
-            NUMBER="$(gh pr create --base "$DEFAULT_BRANCH" --head docs/contributors \
+            gh pr create --base "$DEFAULT_BRANCH" --head docs/contributors \
               --title "docs: refresh live demo and contributors" \
-              --body "Filled by this Action so the wall stays current." \
-              --json number --jq .number)"
+              --body "Filled by this Action so the wall stays current."
+            NUMBER="$(gh pr list --head docs/contributors --state open --json number -q '.[0].number')"
           fi
           gh pr merge "$NUMBER" --squash --auto

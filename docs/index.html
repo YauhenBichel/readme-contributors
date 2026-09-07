@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>README contributors — a circular wall for any GitHub repo</title>
-  <meta name="description" content="A composite GitHub Action that draws a contributors wall into a README. No table. No third-party list service. Pin v1.5.1 and pick a layout. README icons are clickable polaroids." />
+  <meta name="description" content="A composite GitHub Action that draws a contributors wall into a README. No table. No third-party list service. Pin v1.6.0 and pick a layout. README icons are clickable polaroids." />
   <style>
     :root {
       --void: #0b0907;
@@ -376,14 +376,14 @@
       ·
       <a href="https://github.com/marketplace/actions/readme-contributors">Marketplace</a>
       ·
-      <a href="https://github.com/YauhenBichel/readme-contributors/releases/tag/v1.5.1">v1.5.1</a>
+      <a href="https://github.com/YauhenBichel/readme-contributors/releases/tag/v1.6.0">v1.6.0</a>
     </p>
     <h1>People on the README.</h1>
     <p class="lede">
       Fill a README with clickable polaroid stickers from the GitHub API.
       Bots are omitted. Each face is its own link. The SVG layouts below
       are for Pages. Any public repository can pin the
-      <a href="https://github.com/YauhenBichel/readme-contributors/releases/tag/v1.5.1">v1.5.1</a>
+      <a href="https://github.com/YauhenBichel/readme-contributors/releases/tag/v1.6.0">v1.6.0</a>
       release.
     </p>
     <div class="actions">
@@ -519,7 +519,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: YauhenBichel/readme-contributors@v1.5.1
+      - uses: YauhenBichel/readme-contributors@v1.6.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: |
@@ -544,7 +544,7 @@ jobs:
           <h3>stickers</h3>
           <p>Tilted cards, chunky rings, a little lift.</p>
           <img src="./layout-stickers.svg" alt="stickers layout" />
-          <pre>- uses: YauhenBichel/readme-contributors@v1.5.1
+          <pre>- uses: YauhenBichel/readme-contributors@v1.6.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: stickers</pre>
@@ -553,7 +553,7 @@ jobs:
           <h3>facepile</h3>
           <p>Overlapping circles. First person sits on top.</p>
           <img src="./layout-facepile.svg" alt="facepile layout" />
-          <pre>- uses: YauhenBichel/readme-contributors@v1.5.1
+          <pre>- uses: YauhenBichel/readme-contributors@v1.6.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: facepile</pre>
@@ -562,7 +562,7 @@ jobs:
           <h3>grid</h3>
           <p>Spaced circles. Wraps at <code>columns</code>.</p>
           <img src="./layout-grid.svg" alt="grid layout" />
-          <pre>- uses: YauhenBichel/readme-contributors@v1.5.1
+          <pre>- uses: YauhenBichel/readme-contributors@v1.6.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: grid</pre>
@@ -571,7 +571,7 @@ jobs:
           <h3>tiles</h3>
           <p>Rounded squares instead of circles.</p>
           <img src="./layout-tiles.svg" alt="tiles layout" />
-          <pre>- uses: YauhenBichel/readme-contributors@v1.5.1
+          <pre>- uses: YauhenBichel/readme-contributors@v1.6.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: tiles</pre>
@@ -580,7 +580,7 @@ jobs:
           <h3>list</h3>
           <p>Avatar, name, and login on each row.</p>
           <img src="./layout-list.svg" alt="list layout" />
-          <pre>- uses: YauhenBichel/readme-contributors@v1.5.1
+          <pre>- uses: YauhenBichel/readme-contributors@v1.6.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: list</pre>
@@ -589,7 +589,7 @@ jobs:
           <h3>compact</h3>
           <p>A tighter grid when the list is long.</p>
           <img src="./layout-compact.svg" alt="compact layout" />
-          <pre>- uses: YauhenBichel/readme-contributors@v1.5.1
+          <pre>- uses: YauhenBichel/readme-contributors@v1.6.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: compact</pre>
@@ -598,7 +598,7 @@ jobs:
           <h3>wave</h3>
           <p>A sine-staggered row. Good for a short team.</p>
           <img src="./layout-wave.svg" alt="wave layout" />
-          <pre>- uses: YauhenBichel/readme-contributors@v1.5.1
+          <pre>- uses: YauhenBichel/readme-contributors@v1.6.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: wave</pre>
@@ -607,7 +607,7 @@ jobs:
           <h3>orbit</h3>
           <p>The first contributor in the middle, the rest on a ring.</p>
           <img src="./layout-orbit.svg" alt="orbit layout" />
-          <pre>- uses: YauhenBichel/readme-contributors@v1.5.1
+          <pre>- uses: YauhenBichel/readme-contributors@v1.6.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: orbit</pre>
@@ -616,7 +616,7 @@ jobs:
           <h3>honeycomb</h3>
           <p>Hex tiles on offset rows.</p>
           <img src="./layout-honeycomb.svg" alt="honeycomb layout" />
-          <pre>- uses: YauhenBichel/readme-contributors@v1.5.1
+          <pre>- uses: YauhenBichel/readme-contributors@v1.6.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: honeycomb</pre>
@@ -625,7 +625,7 @@ jobs:
           <h3>ribbon</h3>
           <p>A zipper row that steps up and down.</p>
           <img src="./layout-ribbon.svg" alt="ribbon layout" />
-          <pre>- uses: YauhenBichel/readme-contributors@v1.5.1
+          <pre>- uses: YauhenBichel/readme-contributors@v1.6.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: ribbon</pre>
@@ -634,7 +634,7 @@ jobs:
           <h3>constellation</h3>
           <p>Faces with faint links between neighbours.</p>
           <img src="./layout-constellation.svg" alt="constellation layout" />
-          <pre>- uses: YauhenBichel/readme-contributors@v1.5.1
+          <pre>- uses: YauhenBichel/readme-contributors@v1.6.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: constellation</pre>
@@ -643,7 +643,7 @@ jobs:
           <h3>banner</h3>
           <p>The first person is larger; the others sit beside them.</p>
           <img src="./layout-banner.svg" alt="banner layout" />
-          <pre>- uses: YauhenBichel/readme-contributors@v1.5.1
+          <pre>- uses: YauhenBichel/readme-contributors@v1.6.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: banner</pre>
@@ -661,7 +661,7 @@ jobs:
         <article>
           <h3>midnight</h3>
           <img src="./theme-midnight.svg" alt="midnight theme" />
-          <pre>- uses: YauhenBichel/readme-contributors@v1.5.1
+          <pre>- uses: YauhenBichel/readme-contributors@v1.6.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: facepile
