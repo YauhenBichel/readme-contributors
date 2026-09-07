@@ -37,6 +37,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: YauhenBichel/py-harness
           format: html
+          caption: auto
+          model: gpt-4o-mini
+          model-api-key: ${{ secrets.OPENAI_API_KEY }}
           marker-start: "<!-- demo: live -start -->"
           marker-end: "<!-- demo: live -end -->"
 
@@ -46,6 +49,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           format: html
           exclude: ghost
+          caption: auto
+          model: gpt-4o-mini
+          model-api-key: ${{ secrets.OPENAI_API_KEY }}
 
       - name: Land the refresh on main
         env:
