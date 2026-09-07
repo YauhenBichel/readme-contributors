@@ -3,7 +3,7 @@
 [![CI](https://github.com/YauhenBichel/readme-contributors/actions/workflows/ci.yml/badge.svg)](https://github.com/YauhenBichel/readme-contributors/actions/workflows/ci.yml)
 [![Contributors](https://img.shields.io/github/contributors/YauhenBichel/readme-contributors)](https://github.com/YauhenBichel/readme-contributors/graphs/contributors)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
-[![GitHub Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-v1.6.0-6e5494)](https://github.com/marketplace/actions/readme-contributors)
+[![GitHub Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-v1.7.0-6e5494)](https://github.com/marketplace/actions/readme-contributors)
 [![Examples](https://img.shields.io/badge/examples-GitHub%20Pages-0969da)](https://yauhenbichel.github.io/readme-contributors/)
 [![good first issue](https://img.shields.io/github/issues/YauhenBichel/readme-contributors/good%20first%20issue)](https://github.com/YauhenBichel/readme-contributors/labels/good%20first%20issue)
 
@@ -26,8 +26,11 @@ service.
 
 A **GitHub Action** that fills a README with the people who actually
 committed. Each person is a **polaroid**: face, name, a bit of tilt.
-Each card is its own link. Bots are omitted. No `<table>`. No
-third-party list service.
+Each card is its own link. Bots are omitted. `exclude` drops named
+logins. Merged PR `Co-authored-by` trailers join the wall. An empty
+list writes “Be the first to appear here.” Hover a cut name to see
+the full one. `caption: auto` adds one muted sentence when a model
+key is set. No `<table>`. No third-party list service.
 
 Watch the 18s demo (GitHub README plays this as a GIF; the MP4 is on
 [Pages](https://yauhenbichel.github.io/readme-contributors/#demo)):
@@ -54,10 +57,12 @@ GitHub profile.
 2. Call the Action. Pin the tag to read. Pin the SHA if the job can write:
 
 ```yaml
-- uses: YauhenBichel/readme-contributors@efb37982d140840e9698014f756d9345ceb3ab4c # v1.6.0
+- uses: YauhenBichel/readme-contributors@06d127a2e5ea32a9d8d6c4a00944d14cf6ea239e # v1.7.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     format: html
+    # exclude: ghost
+    # caption: auto
 ```
 
 3. Commit the rewritten README and `.github/faces`.
@@ -193,7 +198,7 @@ person stays a link. `max` defaults to 100 (set `0` for up to 500).
 </p>
 
 ```yaml
-- uses: YauhenBichel/readme-contributors@v1.6.0
+- uses: YauhenBichel/readme-contributors@v1.7.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: tiles
@@ -217,7 +222,7 @@ others paint a frame so the wall stays the same in both.
 </p>
 
 ```yaml
-- uses: YauhenBichel/readme-contributors@v1.6.0
+- uses: YauhenBichel/readme-contributors@v1.7.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     layout: facepile
@@ -259,7 +264,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: YauhenBichel/readme-contributors@efb37982d140840e9698014f756d9345ceb3ab4c # v1.6.0
+      - uses: YauhenBichel/readme-contributors@06d127a2e5ea32a9d8d6c4a00944d14cf6ea239e # v1.7.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           # layout: tiles

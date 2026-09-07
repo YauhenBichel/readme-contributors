@@ -29,7 +29,7 @@ jobs:
         with:
           persist-credentials: true
 
-      - uses: YauhenBichel/readme-contributors@v1.6.0
+      - uses: YauhenBichel/readme-contributors@v1.7.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           # layout: tiles
