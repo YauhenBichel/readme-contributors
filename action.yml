@@ -19,9 +19,10 @@ inputs:
     default: svg
   layout:
     description: >
-      Wall layout. One of facepile (default), stickers, grid, tiles, list,
-      compact, wave, orbit, honeycomb, ribbon, constellation, banner.
-    default: facepile
+      Wall layout. auto (default) picks facepile (≤8), grid (≤24), or
+      compact. Or set facepile, stickers, grid, tiles, list, compact,
+      wave, orbit, honeycomb, ribbon, constellation, banner.
+    default: auto
   theme:
     description: >
       Color theme. One of auto (default), github, midnight, sunrise,
@@ -37,8 +38,10 @@ inputs:
     description: Face diameter in pixels
     default: "72"
   max:
-    description: Maximum people to draw (API order, bots already omitted)
-    default: "48"
+    description: >
+      Maximum people to draw (API order, bots already omitted). 0 means
+      500. Default 100 so a mid-size repo still lists everyone.
+    default: "100"
   repository:
     description: owner/name to read contributors from
     default: ${{ github.repository }}

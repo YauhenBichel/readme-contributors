@@ -115,9 +115,12 @@ source of truth.
 
 ## Layouts
 
-Set `layout`. The default stays the overlapping facepile. The README
-wall is always the clickable polaroids; `layout` changes the SVG
-drawn for Pages.
+Set `layout`. The default is `auto`: **facepile** up to 8 people,
+**grid** up to 24, **compact** after that. The README wall is always
+clickable polaroids. Faces shrink at 20 and 50 people so the row still
+wraps. From 12 people up, a name list sits under the faces so every
+person stays a link. `max` defaults to 100 (set `0` for up to 500).
+`layout` still changes the SVG drawn for Pages.
 
 **stickers** — tilted cards with a chunky ring and a drop shadow.
 
@@ -293,11 +296,11 @@ No token, no GPU, no extra packages. `fill.py` is stdlib only.
 | `svg` | `.github/contributors.svg` | Generated wall (when `format` is `svg`) |
 | `faces` | `.github/faces` | One polaroid SVG per person |
 | `format` | `svg` | README icons always link to profiles; `html` skips the combined SVG file |
-| `layout` | `facepile` | `facepile`, `stickers`, `grid`, `tiles`, `list`, `compact`, `wave`, `orbit`, `honeycomb`, `ribbon`, `constellation`, `banner` |
+| `layout` | `auto` | `auto` picks facepile / grid / compact by count; or pin `facepile`, `stickers`, `grid`, `tiles`, `list`, `compact`, `wave`, `orbit`, `honeycomb`, `ribbon`, `constellation`, `banner` |
 | `theme` | `auto` | `auto`, `github`, `midnight`, `sunrise`, `forest`, `ocean`, `mono` |
 | `columns` | `8` | Faces per row |
 | `avatar-size` | `72` | Face diameter, pixels |
-| `max` | `48` | Cap after bots are omitted |
+| `max` | `100` | Cap after bots are omitted. `0` means 500 |
 | `repository` | the current repo | `owner/name` to read |
 | `token` | `github.token` | Raises the API rate limit |
 | `check` | `false` | Exit 1 if the files would change |

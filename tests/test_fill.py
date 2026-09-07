@@ -221,6 +221,36 @@ class FillTest(unittest.TestCase):
         self.assertIn("github.com/carol", html)
         self.assertNotIn("<table>", html)
 
+    def test_auto_layout_grows_with_the_list(self) -> None:
+        self.assertEqual(self.mod.fit_layout("auto", 6), "facepile")
+        self.assertEqual(self.mod.fit_layout("auto", 20), "grid")
+        self.assertEqual(self.mod.fit_layout("auto", 50), "compact")
+        self.assertEqual(self.mod.fit_layout("auto", 100), "compact")
+        self.assertEqual(self.mod.fit_layout("orbit", 100), "orbit")
+
+    def test_readme_faces_shrink_for_long_lists(self) -> None:
+        self.assertEqual(self.mod.fit_readme_size(8, 72), 72)
+        self.assertEqual(self.mod.fit_readme_size(20, 72), 72)
+        self.assertEqual(self.mod.fit_readme_size(50, 72), 48)
+        self.assertEqual(self.mod.fit_readme_size(100, 72), 36)
+
+    def test_long_readme_wall_credits_every_name(self) -> None:
+        people = [{"login": f"user{i}", "name": f"User {i}"} for i in range(20)]
+        html = self.mod.render_wall(people)
+        for person in people:
+            self.assertIn(f'href="https://github.com/{person["login"]}"', html)
+        self.assertIn("<span> · </span>", html)
+        self.assertNotIn("<table>", html)
+
+    def test_fifty_and_one_hundred_people_all_get_a_link(self) -> None:
+        for count in (50, 100):
+            people = [{"login": f"u{i}", "name": f"N{i}"} for i in range(count)]
+            html = self.mod.render_wall(people)
+            with self.subTest(count=count):
+                self.assertEqual(
+                    html.count('href="https://github.com/'), count * 2
+                )
+
 
     def test_every_svg_face_links_to_the_profile(self) -> None:
         people = [
