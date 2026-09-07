@@ -101,7 +101,6 @@ other repositories get.
   <a href="https://github.com/Aditya-233" title="Aditya" aria-label="Aditya"><img src=".github/faces/Aditya-233.svg" width="63" height="72" alt="Aditya" /></a>
   <a href="https://github.com/kkkhs" title="Huangshuo Kuang" aria-label="Huangshuo Kuang"><img src=".github/faces/kkkhs.svg" width="76" height="87" alt="Huangshuo Kuang" /></a>
 </p>
-<p align="center"><em>The contributors to the py-harness project include Yauhen Bichel, Mark Xian, Itzsaurav, svkzn, Aditya, and Huangshuo Kuang.</em></p>
 <!-- demo: live -end -->
 
 Examples for every layout live on the
@@ -271,6 +270,9 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           # layout: tiles
           # theme: midnight
+          # caption: auto
+          # model: gpt-4o-mini
+          # model-api-key: ${{ secrets.OPENAI_API_KEY }}
       - run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
@@ -284,6 +286,28 @@ A copy-paste workflow that opens a pull request on a protected default
 branch is in [examples/contributors.yml](./examples/contributors.yml).
 The Action only writes files in the workspace. Your workflow decides
 whether to commit them.
+
+### Use a model
+
+The wall stays rule-based. Add repository secret `OPENAI_API_KEY` and
+copy [examples/contributors-openai.yml](./examples/contributors-openai.yml).
+Live on this README:
+
+- *The contributors to the py-harness project include Yauhen Bichel, Mark Xian, Itzsaurav, svkzn, Aditya, and Huangshuo Kuang.*
+- *Yauhen Bichel and HeaTTap have contributed to the readme-contributors project.*
+
+```yaml
+- uses: YauhenBichel/readme-contributors@e4468b5b0cc0f8b87f0b083bc13efc9289ff7ecd
+  with:
+    token: ${{ secrets.GITHUB_TOKEN }}
+    caption: auto
+    model: gpt-4o-mini
+    model-api-key: ${{ secrets.OPENAI_API_KEY }}
+```
+
+Pin that SHA until the next release. `@v1.7.0` can call a model but
+only sees a headcount. Stock “dedicated individuals” lines are
+dropped. A missing key or a 429 leaves no caption.
 
 ## Contribute
 
@@ -347,7 +371,6 @@ Thank you to everyone who has helped this Action.
   <a href="https://github.com/YauhenBichel" title="Yauhen Bichel" aria-label="Yauhen Bichel"><img src=".github/faces/YauhenBichel.svg" width="87" height="99" alt="Yauhen Bichel" /></a>
   <a href="https://github.com/HeaTTap" title="HeaTTap" aria-label="HeaTTap"><img src=".github/faces/HeaTTap.svg" width="66" height="75" alt="HeaTTap" /></a>
 </p>
-<p align="center"><em>Yauhen Bichel and HeaTTap have contributed to the readme-contributors project.</em></p>
 <!-- readme: contributors,bots/- -end -->
 
 Filled from GitHub commits (bots omitted).
