@@ -36,10 +36,9 @@ exercised with fixture people.
 ## Pick an issue
 
 Start at [`good first issue`](https://github.com/YauhenBichel/readme-contributors/labels/good%20first%20issue).
-If that list is empty, these two are ready:
+If that list is empty, this one is ready:
 
-1. Make face overlap an optional `overlap` input (today it is `0.64` in `render_svg`).
-2. When the README markers are missing, print both comments so they can be pasted.
+1. When the README markers are missing, print both comments so they can be pasted.
 
 Design questions go in the issue thread.
 

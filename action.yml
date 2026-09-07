@@ -37,6 +37,12 @@ inputs:
   avatar-size:
     description: Face diameter in pixels
     default: "72"
+  overlap:
+    description: >
+      Facepile step as a fraction of avatar-size. Default 0.64 (faces
+      overlap). 1 sits faces side by side with no overlap. Pages SVG
+      only. README polaroids are unchanged.
+    default: "0.64"
   max:
     description: >
       Maximum people to draw (API order, bots already omitted). 0 means
@@ -112,6 +118,7 @@ runs:
         THEME: ${{ inputs.theme }}
         COLUMNS: ${{ inputs.columns }}
         AVATAR_SIZE: ${{ inputs.avatar-size }}
+        OVERLAP: ${{ inputs.overlap }}
         MAX_PEOPLE: ${{ inputs.max }}
         EXCLUDE: ${{ inputs.exclude }}
         CAPTION: ${{ inputs.caption }}

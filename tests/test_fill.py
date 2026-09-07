@@ -50,6 +50,7 @@ class FillTest(unittest.TestCase):
         self.assertIn("Zero-config leaves the wall with no caption", text)
         self.assertIn("Filled from the GitHub contributors API", text)
         self.assertIn("Stale files are removed when a login leaves the wall", text)
+        self.assertIn("| `overlap` | `0.64` |", text)
         self.assertIn("## Examples", text)
         self.assertIn("## Used by", text)
         self.assertIn("YauhenBichel/py-harness", text)
@@ -99,6 +100,24 @@ class FillTest(unittest.TestCase):
         people = [{"login": f"u{i}", "name": f"User {i}"} for i in range(9)]
         svg = self.mod.render_svg(people, size=72, columns=8)
         self.assertIn('height="166"', svg)
+
+    def test_default_overlap_matches_the_old_facepile_step(self) -> None:
+        people = [{"login": f"u{i}", "name": f"U{i}"} for i in range(3)]
+        default = self.mod.svg_width(people, 72, 8, layout="facepile")
+        explicit = self.mod.svg_width(
+            people, 72, 8, layout="facepile", overlap=0.64
+        )
+        self.assertEqual(default, explicit)
+        self.assertEqual(default, 4 * 2 + 72 + int(72 * 0.64) * 2)
+
+    def test_overlap_one_grows_width_linearly(self) -> None:
+        three = [{"login": f"u{i}", "name": f"U{i}"} for i in range(3)]
+        four = [{"login": f"u{i}", "name": f"U{i}"} for i in range(4)]
+        wide3 = self.mod.svg_width(three, 72, 8, layout="facepile", overlap=1)
+        wide4 = self.mod.svg_width(four, 72, 8, layout="facepile", overlap=1)
+        self.assertEqual(wide4 - wide3, 72)
+        svg = self.mod.render_svg(four, layout="facepile", size=72, overlap=1)
+        self.assertNotIn("<table>", svg)
 
     def test_grid_does_not_overlap_faces(self) -> None:
         people = [{"login": "alice", "name": "Alice"}, {"login": "bob", "name": "Bob"}]
@@ -219,6 +238,9 @@ class FillTest(unittest.TestCase):
         self.assertIn("LAYOUT:", text)
         self.assertIn("THEME:", text)
         self.assertIn("FACES_PATH:", text)
+        self.assertIn("overlap:", text)
+        self.assertIn("OVERLAP:", text)
+        self.assertIn("default: \"0.64\"", text)
 
     def test_html_mode_has_no_table(self) -> None:
         html = self.mod.render_wall(
