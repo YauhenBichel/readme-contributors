@@ -1312,18 +1312,91 @@ def _is_grated(text: str) -> bool:
     return not any(word in low for word in _UNSAFE)
 
 
-def ask_caption(count: int) -> str:
+_STOCK_CAPTION = (
+    "showcases the",
+    "dedicated individuals",
+    "dedicated people",
+    "valued contributors",
+    "amazing contributors",
+    "this contributors wall",
+    "contributors wall showcases",
+)
+
+
+def _project_name(repo: str) -> str:
+    raw = (repo or "").strip()
+    if "/" in raw:
+        return raw.split("/", 1)[1]
+    return raw
+
+
+def caption_needles(people: list[dict[str, str]], repo: str) -> set[str]:
+    found: set[str] = set()
+    raw = (repo or "").strip()
+    if raw:
+        found.add(raw.lower())
+    project = _project_name(raw)
+    if project:
+        found.add(project.lower())
+    if "/" in raw:
+        owner = raw.split("/", 1)[0].strip()
+        if owner:
+            found.add(owner.lower())
+    for person in people:
+        login = str(person.get("login") or "").strip()
+        name = str(person.get("name") or "").strip()
+        if login:
+            found.add(login.lower())
+        if name:
+            found.add(name.lower())
+            for part in name.replace("-", " ").split():
+                if len(part) >= 2:
+                    found.add(part.lower())
+    return {item for item in found if item}
+
+
+def caption_is_specific(
+    line: str, people: list[dict[str, str]], repo: str
+) -> bool:
+    text = (line or "").strip()
+    if not _is_grated(text):
+        return False
+    if len(text) < 12 or len(text) > 180:
+        return False
+    low = text.lower()
+    if any(stock in low for stock in _STOCK_CAPTION):
+        return False
+    needles = caption_needles(people, repo)
+    if not needles:
+        return False
+    return any(needle in low for needle in needles)
+
+
+def ask_caption(people: list[dict[str, str]], repo: str = "") -> str:
     wanted = os.environ.get("CAPTION", "").strip()
     if wanted.lower() != "auto":
         return wanted
+    if not people:
+        return ""
     cfg = model_settings()
     if not cfg:
         return ""
     key, model, base = cfg
+    project = _project_name(repo) or "this repository"
+    roster = [
+        {
+            "login": str(person.get("login") or ""),
+            "name": str(person.get("name") or person.get("login") or ""),
+        }
+        for person in people[:8]
+    ]
     system = (
-        "Write one muted G-rated sentence about a contributors wall. "
-        "Reply with JSON only: {\"caption\": \"<one sentence>\"}. "
-        "Use the count. Never invent names. No slurs, no adult content."
+        "Write one muted G-rated sentence about the people on this "
+        "repository's contributors wall. "
+        'Reply with JSON only: {"caption": "<one sentence>"}. '
+        "Name the project. You may name people from the list. "
+        "Never invent names or facts. Do not write stock lines about "
+        "showcasing dedicated individuals. No slurs, no adult content."
     )
     try:
         data = _post_json(
@@ -1331,13 +1404,20 @@ def ask_caption(count: int) -> str:
             key,
             {
                 "model": model,
-                "temperature": 0.3,
-                "max_tokens": 60,
+                "temperature": 0.4,
+                "max_tokens": 80,
                 "messages": [
                     {"role": "system", "content": system},
                     {
                         "role": "user",
-                        "content": json.dumps({"people": count}),
+                        "content": json.dumps(
+                            {
+                                "repository": repo,
+                                "project": project,
+                                "count": len(people),
+                                "people": roster,
+                            }
+                        ),
                     },
                 ],
             },
@@ -1369,8 +1449,10 @@ def ask_caption(count: int) -> str:
     if not isinstance(payload, dict):
         return ""
     line = str(payload.get("caption") or "").strip()
-    if not _is_grated(line):
+    if not caption_is_specific(line, people, repo):
+        print("caption skipped: generic or unsafe", file=sys.stderr)
         return ""
+    print(f"caption: {line}", file=sys.stderr)
     return line
 
 
@@ -1428,7 +1510,7 @@ def main() -> int:
         size=size,
         format=fmt,
         faces_href=faces_href,
-        caption=ask_caption(len(people)),
+        caption=ask_caption(people, repo=repo),
     )
     updated = apply_readme(readme.read_text(encoding="utf-8"), block)
     same_readme = updated == readme.read_text(encoding="utf-8")

@@ -29,8 +29,9 @@ committed. Each person is a **polaroid**: face, name, a bit of tilt.
 Each card is its own link. Bots are omitted. `exclude` drops named
 logins. Merged PR `Co-authored-by` trailers join the wall. An empty
 list writes “Be the first to appear here.” Hover a cut name to see
-the full one. `caption: auto` adds one muted sentence when a model
-key is set. No `<table>`. No third-party list service.
+the full one. `caption: auto` asks a model for one sentence that
+names this repository or the people on the wall; stock “dedicated
+individuals” lines are dropped. No `<table>`. No third-party list service.
 
 Watch the 18s demo (GitHub README plays this as a GIF; the MP4 is on
 [Pages](https://yauhenbichel.github.io/readme-contributors/#demo)):
@@ -100,7 +101,6 @@ other repositories get.
   <a href="https://github.com/Aditya-233" title="Aditya" aria-label="Aditya"><img src=".github/faces/Aditya-233.svg" width="63" height="72" alt="Aditya" /></a>
   <a href="https://github.com/kkkhs" title="Huangshuo Kuang" aria-label="Huangshuo Kuang"><img src=".github/faces/kkkhs.svg" width="76" height="87" alt="Huangshuo Kuang" /></a>
 </p>
-<p align="center"><em>The contributors wall showcases the efforts of 6 dedicated individuals.</em></p>
 <!-- demo: live -end -->
 
 Examples for every layout live on the
@@ -312,8 +312,8 @@ No token, no GPU, no extra packages. `fill.py` is stdlib only.
 | `avatar-size` | `72` | Face diameter, pixels |
 | `max` | `100` | Cap after bots are omitted. `0` means 500 |
 | `exclude` | empty | Comma-separated logins to omit (case-insensitive, after bots) |
-| `caption` | empty | `auto` writes one muted sentence when a model key is set |
-| `model` | empty | Optional chat model. `github` uses GitHub Models with `GITHUB_TOKEN` |
+| `caption` | empty | `auto` writes one sentence that names the repo or people when a model key is set |
+| `model` | empty | Optional OpenAI-compatible chat model for `caption: auto` |
 | `model-api-key` | empty | Optional OpenAI-compatible key |
 | `model-base-url` | empty | Optional OpenAI-compatible API root |
 | `repository` | the current repo | `owner/name` to read |
@@ -346,7 +346,6 @@ Thank you to everyone who has helped this Action.
   <a href="https://github.com/YauhenBichel" title="Yauhen Bichel" aria-label="Yauhen Bichel"><img src=".github/faces/YauhenBichel.svg" width="87" height="99" alt="Yauhen Bichel" /></a>
   <a href="https://github.com/HeaTTap" title="HeaTTap" aria-label="HeaTTap"><img src=".github/faces/HeaTTap.svg" width="66" height="75" alt="HeaTTap" /></a>
 </p>
-<p align="center"><em>The contributors wall showcases the achievements of 2 dedicated individuals.</em></p>
 <!-- readme: contributors,bots/- -end -->
 
 Filled from GitHub commits (bots omitted).
