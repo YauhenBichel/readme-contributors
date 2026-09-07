@@ -51,8 +51,9 @@ inputs:
   caption:
     description: >
       Optional line under the wall. Empty (default) writes none. auto
-      writes one muted sentence when a model key is set. Any other
-      value is used as-is.
+      writes one sentence that names the repository or people when a
+      model key is set. Generic filler is dropped. Any other value is
+      used as-is.
     required: false
     default: ""
   model:

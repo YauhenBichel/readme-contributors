@@ -434,6 +434,7 @@ class FillTest(unittest.TestCase):
         )
 
     def test_caption_auto_uses_model_and_omits_junk(self) -> None:
+        people = [{"login": f"u{i}", "name": f"User {i}"} for i in range(12)]
         env = {
             "CAPTION": "auto",
             "MODEL_API_KEY": "sk-test",
@@ -444,22 +445,61 @@ class FillTest(unittest.TestCase):
                 "choices": [
                     {
                         "message": {
-                            "content": '{"caption": "Twelve people shipped this."}'
+                            "content": (
+                                '{"caption": "Twelve people keep py-harness honest."}'
+                            )
                         }
                     }
                 ]
             }
-            self.assertEqual(self.mod.ask_caption(12), "Twelve people shipped this.")
+            self.assertEqual(
+                self.mod.ask_caption(people, "YauhenBichel/py-harness"),
+                "Twelve people keep py-harness honest.",
+            )
             self.mod._post_json = lambda *_a, **_k: {  # type: ignore[method-assign]
                 "choices": [{"message": {"content": '{"caption": "nsfw wall"}'}}]
             }
-            self.assertEqual(self.mod.ask_caption(12), "")
+            self.assertEqual(
+                self.mod.ask_caption(people, "YauhenBichel/py-harness"), ""
+            )
+            self.mod._post_json = lambda *_a, **_k: {  # type: ignore[method-assign]
+                "choices": [
+                    {
+                        "message": {
+                            "content": (
+                                '{"caption": "The contributors wall showcases '
+                                'the efforts of 12 dedicated individuals."}'
+                            )
+                        }
+                    }
+                ]
+            }
+            self.assertEqual(
+                self.mod.ask_caption(people, "YauhenBichel/py-harness"), ""
+            )
         wall = self.mod.render_wall(
             [{"login": "alice", "name": "Alice"}],
-            caption="Twelve people shipped this.",
+            caption="Twelve people keep py-harness honest.",
         )
-        self.assertIn("Twelve people shipped this.", wall)
-        self.assertEqual(self.mod.ask_caption(3), "")
+        self.assertIn("Twelve people keep py-harness honest.", wall)
+        self.assertEqual(self.mod.ask_caption(people[:3]), "")
+        self.assertFalse(
+            self.mod.caption_is_specific(
+                "The contributors wall showcases the efforts of 2 dedicated individuals.",
+                people[:2],
+                "YauhenBichel/readme-contributors",
+            )
+        )
+        self.assertTrue(
+            self.mod.caption_is_specific(
+                "Yauhen Bichel and HeaTTap keep readme-contributors current.",
+                [
+                    {"login": "YauhenBichel", "name": "Yauhen Bichel"},
+                    {"login": "HeaTTap", "name": "HeaTTap"},
+                ],
+                "YauhenBichel/readme-contributors",
+            )
+        )
 
     def test_trigger_actor_is_added_when_api_lags(self) -> None:
         api = [{"login": "alice", "name": "Alice"}]
