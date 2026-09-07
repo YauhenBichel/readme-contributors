@@ -927,19 +927,49 @@ def svg_width(
     return width
 
 
+def _fence_spans(text: str) -> list[tuple[int, int]]:
+    """Byte offsets of fenced code blocks (``` ... ```)."""
+    spans: list[tuple[int, int]] = []
+    in_fence = False
+    start = 0
+    idx = 0
+    for line in text.splitlines(keepends=True):
+        if line.lstrip().startswith("```"):
+            if not in_fence:
+                in_fence = True
+                start = idx
+            else:
+                spans.append((start, idx + len(line)))
+                in_fence = False
+        idx += len(line)
+    return spans
+
+
+def _in_span(pos: int, spans: list[tuple[int, int]]) -> bool:
+    return any(lo <= pos < hi for lo, hi in spans)
+
+
 def apply_readme(text: str, block: str) -> str:
     start = _start()
     end = _end()
-    if start not in text or end not in text:
-        raise SystemExit(
-            "README is missing markers.\n\n"
-            "Example comments to paste into your README:\n"
-            f"{start}\n"
-            f"{end}"
-        )
-    before, rest = text.split(start, 1)
-    _, after = rest.split(end, 1)
-    return f"{before}{start}\n{block}{end}{after}"
+    fences = _fence_spans(text)
+    pos = 0
+    while True:
+        i = text.find(start, pos)
+        if i < 0:
+            break
+        j = text.find(end, i + len(start))
+        if j < 0:
+            break
+        if not _in_span(i, fences):
+            return f"{text[:i]}{start}\n{block}{end}{text[j + len(end):]}"
+        pos = i + len(start)
+    raise SystemExit(
+        "README is missing markers.\n\n"
+        "Example comments to paste into your README:\n"
+        f"{start}\n"
+        f"{end}"
+    )
 
 
 def _emit(name: str, value: str) -> None:

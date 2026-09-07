@@ -1,6 +1,7 @@
 # README contributors
 
 [![CI](https://github.com/YauhenBichel/readme-contributors/actions/workflows/ci.yml/badge.svg)](https://github.com/YauhenBichel/readme-contributors/actions/workflows/ci.yml)
+[![Contributors](https://img.shields.io/github/contributors/YauhenBichel/readme-contributors)](https://github.com/YauhenBichel/readme-contributors/graphs/contributors)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
 [![GitHub Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-v1.5.1-6e5494)](https://github.com/marketplace/actions/readme-contributors)
 [![Examples](https://img.shields.io/badge/examples-GitHub%20Pages-0969da)](https://yauhenbichel.github.io/readme-contributors/)
@@ -43,10 +44,6 @@ GitHub profile.
 
 ```markdown
 <!-- readme: contributors,bots/- -start -->
-<p align="center">
-  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src=".github/faces/YauhenBichel.svg" width="87" height="99" alt="Yauhen Bichel" /></a>
-  <a href="https://github.com/HeaTTap" title="HeaTTap"><img src=".github/faces/HeaTTap.svg" width="66" height="75" alt="HeaTTap" /></a>
-</p>
 <!-- readme: contributors,bots/- -end -->
 ```
 
@@ -233,9 +230,6 @@ Add markers to your README:
 Thank you to everyone who has helped.
 
 <!-- readme: contributors,bots/- -start -->
-<p align="center">
-  <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src=".github/faces/YauhenBichel.svg" width="87" height="99" alt="Yauhen Bichel" /></a>
-</p>
 <!-- readme: contributors,bots/- -end -->
 ```
 
@@ -332,6 +326,7 @@ Thank you to everyone who has helped this Action.
 <!-- readme: contributors,bots/- -start -->
 <p align="center">
   <a href="https://github.com/YauhenBichel" title="Yauhen Bichel"><img src=".github/faces/YauhenBichel.svg" width="87" height="99" alt="Yauhen Bichel" /></a>
+  <a href="https://github.com/HeaTTap" title="HeaTTap"><img src=".github/faces/HeaTTap.svg" width="66" height="75" alt="HeaTTap" /></a>
 </p>
 <!-- readme: contributors,bots/- -end -->
 

@@ -1,7 +1,9 @@
 name: Contributors
 
-# Refreshes the live demo (py-harness faces) and this repository's own wall.
-# Protected main refuses a GITHUB_TOKEN push, so the refresh is a PR.
+# Refreshes the live demo (py-harness faces) and this repository's own
+# wall, then merges the pull request so main updates by itself.
+# Needs Settings → Actions → General → Allow GitHub Actions to create
+# and approve pull requests.
 
 on:
   schedule:
@@ -44,7 +46,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           format: html
 
-      - name: Offer the refresh as a pull request
+      - name: Land the refresh on main
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
@@ -58,10 +60,9 @@ jobs:
           git push --force --set-upstream origin docs/contributors
           NUMBER="$(gh pr list --head docs/contributors --state open --json number -q '.[0].number')"
           if [ -z "$NUMBER" ]; then
-            if ! gh pr create --base "$DEFAULT_BRANCH" --head docs/contributors \
+            NUMBER="$(gh pr create --base "$DEFAULT_BRANCH" --head docs/contributors \
               --title "docs: refresh live demo and contributors" \
-              --body "Filled from the GitHub contributors API, bots omitted. Opened because main takes changes only through a pull request."; then
-              echo "Actions cannot open a pull request in this repository."
-              echo "Open https://github.com/${GITHUB_REPOSITORY}/compare/${DEFAULT_BRANCH}...docs/contributors?expand=1"
-            fi
+              --body "Filled by this Action so the wall stays current." \
+              --json number --jq .number)"
           fi
+          gh pr merge "$NUMBER" --squash --auto
