@@ -14,9 +14,11 @@ A **GitHub Action** that draws a **contributors** wall into your
 name), plus SVG layouts for Pages (facepile, stickers, grid, tiles,
 orbit, honeycomb, and more). It reads the GitHub contributors API,
 adds the person who just landed and merged pull request authors
-when that list is behind, omits bots, and replaces a pair of HTML
-markers. No `<table>`, so GitHub does not draw a grid. No
-third-party list service.
+(plus `Co-authored-by` trailers on those PRs) when that list is
+behind, omits bots, honors `exclude`, and replaces a pair of HTML
+markers. An empty wall writes “Be the first to appear here.”
+No `<table>`, so GitHub does not draw a grid. No third-party list
+service.
 
 [![18s demo](./docs/media/readme-contributors-demo.gif)](https://yauhenbichel.github.io/readme-contributors/#demo)
 
@@ -303,6 +305,11 @@ No token, no GPU, no extra packages. `fill.py` is stdlib only.
 | `columns` | `8` | Faces per row |
 | `avatar-size` | `72` | Face diameter, pixels |
 | `max` | `100` | Cap after bots are omitted. `0` means 500 |
+| `exclude` | empty | Comma-separated logins to omit (case-insensitive, after bots) |
+| `caption` | empty | `auto` writes one muted sentence when a model key is set |
+| `model` | empty | Optional chat model. `github` uses GitHub Models with `GITHUB_TOKEN` |
+| `model-api-key` | empty | Optional OpenAI-compatible key |
+| `model-base-url` | empty | Optional OpenAI-compatible API root |
 | `repository` | the current repo | `owner/name` to read |
 | `token` | `github.token` | Raises the API rate limit |
 | `check` | `false` | Exit 1 if the files would change |

@@ -13,6 +13,7 @@ import base64
 import json
 import math
 import os
+import re
 import sys
 from pathlib import Path
 from typing import Mapping
@@ -23,6 +24,27 @@ API = "https://api.github.com"
 AVATARS = "https://avatars.githubusercontent.com"
 DEFAULT_START = "<!-- readme: contributors,bots/- -start -->"
 DEFAULT_END = "<!-- readme: contributors,bots/- -end -->"
+EMPTY_WALL = "Be the first to appear here."
+GITHUB_MODELS_URL = "https://models.github.ai/inference"
+_COAUTHOR_LINE = re.compile(r"(?im)^[ \t]*co-authored-by:[ \t]+(.+)$")
+_GITHUB_NOREPLY = re.compile(
+    r"(?:(?P<id>\d+)\+)?(?P<login>[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?)"
+    r"@users\.noreply\.github\.com$",
+    re.I,
+)
+_LOGIN_TOKEN = re.compile(
+    r"^@?(?P<login>[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?)\b"
+)
+_UNSAFE = (
+    "nsfw",
+    "porn",
+    "sex",
+    "nude",
+    "xxx",
+    "kill yourself",
+    "kys",
+    "suicide",
+)
 # 1x1 PNG used only when a test injects a known image.
 TINY_PNG = bytes.fromhex(
     "89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489"
@@ -152,20 +174,66 @@ def is_human_login(login: str, kind: str = "") -> bool:
     return not login.lower().endswith("[bot]")
 
 
+def parse_exclude(raw: str) -> frozenset[str]:
+    return frozenset(
+        part.strip().lower() for part in (raw or "").split(",") if part.strip()
+    )
+
+
+def is_excluded(login: str, blocked: frozenset[str]) -> bool:
+    return (login or "").strip().lower() in blocked
+
+
+def parse_coauthor_logins(*texts: str) -> list[str]:
+    found: list[str] = []
+    seen: set[str] = set()
+    blob = "\n".join(text or "" for text in texts)
+    for match in _COAUTHOR_LINE.finditer(blob):
+        login = _coauthor_login(match.group(1))
+        key = login.lower()
+        if not login or key in seen or not is_human_login(login):
+            continue
+        seen.add(key)
+        found.append(login)
+    return found
+
+
+def _coauthor_login(rest: str) -> str:
+    raw = (rest or "").strip()
+    name_part = raw.split("<", 1)[0].strip()
+    if not is_human_login(name_part):
+        return ""
+    email_match = re.search(r"<([^>]+)>", raw)
+    if email_match:
+        email = email_match.group(1).strip()
+        noreply = _GITHUB_NOREPLY.search(email)
+        if noreply:
+            return noreply.group("login")
+        return ""
+    token = _LOGIN_TOKEN.match(raw)
+    return token.group("login") if token else ""
+
+
 def merge_people(
     people: list[dict[str, str]],
     extras: list[dict[str, str]],
     limit: int,
+    exclude: str = "",
 ) -> list[dict[str, str]]:
     """Append unique humans from extras without growing past limit."""
+    blocked = parse_exclude(exclude)
     seen = {person["login"].lower() for person in people}
-    out = list(people)
+    out = [person for person in people if not is_excluded(person["login"], blocked)]
     for extra in extras:
         if len(out) >= limit:
             break
         login = str(extra.get("login") or "").strip()
         kind = str(extra.get("type") or "")
-        if not is_human_login(login, kind) or login.lower() in seen:
+        if (
+            not is_human_login(login, kind)
+            or login.lower() in seen
+            or is_excluded(login, blocked)
+        ):
             continue
         seen.add(login.lower())
         name = str(extra.get("name") or "").strip() or login
@@ -233,18 +301,18 @@ def merged_pr_people(rows: object) -> list[dict[str, str]]:
         if not isinstance(row, dict) or not row.get("merged_at"):
             continue
         user = row.get("user")
-        if not isinstance(user, dict):
-            continue
-        login = str(user.get("login") or "").strip()
-        if not login:
-            continue
-        extras.append(
-            {
-                "login": login,
-                "name": str(user.get("name") or login),
-                "type": str(user.get("type") or ""),
-            }
-        )
+        if isinstance(user, dict):
+            login = str(user.get("login") or "").strip()
+            if login:
+                extras.append(
+                    {
+                        "login": login,
+                        "name": str(user.get("name") or login),
+                        "type": str(user.get("type") or ""),
+                    }
+                )
+        for login in parse_coauthor_logins(str(row.get("body") or "")):
+            extras.append({"login": login, "name": login, "type": "User"})
     return extras
 
 
@@ -266,7 +334,9 @@ def _append_resolved(
     extras: list[dict[str, str]],
     token: str,
     limit: int,
+    exclude: str = "",
 ) -> list[dict[str, str]]:
+    blocked = parse_exclude(exclude)
     pending: list[dict[str, str]] = []
     seen = {person["login"].lower() for person in people}
     for extra in extras:
@@ -274,7 +344,11 @@ def _append_resolved(
             break
         login = str(extra.get("login") or "").strip()
         kind = str(extra.get("type") or "")
-        if not is_human_login(login, kind) or login.lower() in seen:
+        if (
+            not is_human_login(login, kind)
+            or login.lower() in seen
+            or is_excluded(login, blocked)
+        ):
             continue
         person = _person_from_login(login, token, kind)
         if person is None:
@@ -301,7 +375,10 @@ def list_merged_pr_authors(
     return extras
 
 
-def list_people(repo: str, token: str, limit: int = 100) -> list[dict[str, str]]:
+def list_people(
+    repo: str, token: str, limit: int = 100, exclude: str = ""
+) -> list[dict[str, str]]:
+    blocked = parse_exclude(exclude)
     people: list[dict[str, str]] = []
     page = 1
     while len(people) < limit:
@@ -318,6 +395,8 @@ def list_people(repo: str, token: str, limit: int = 100) -> list[dict[str, str]]
                 continue
             login = str(row.get("login") or "")
             kind = str(row.get("type") or "")
+            if is_excluded(login, blocked):
+                continue
             person = _person_from_login(login, token, kind)
             if person is None:
                 continue
@@ -330,7 +409,7 @@ def list_people(repo: str, token: str, limit: int = 100) -> list[dict[str, str]]
         load_event(),
     )
     extras.extend(list_merged_pr_authors(repo, token, limit))
-    return _append_resolved(people, extras, token, limit)
+    return _append_resolved(people, extras, token, limit, exclude)
 
 
 def fetch_avatars(
@@ -1044,7 +1123,7 @@ def render_html(
 ) -> str:
     """Clickable stickers. No table, so GitHub draws no grid."""
     if not people:
-        return ""
+        return f"<p>{_xml(EMPTY_WALL)}</p>\n"
     cards = []
     prefix = faces_href.rstrip("/")
     for index, person in enumerate(people):
@@ -1059,7 +1138,8 @@ def render_html(
             src = f"https://avatars.githubusercontent.com/{login}?s={face * 2}"
             height = face
         cards.append(
-            f'<a href="https://github.com/{login}" title="{name}">'
+            f'<a href="https://github.com/{login}" title="{name}" '
+            f'aria-label="{name}">'
             f'<img src="{src}" width="{face}" height="{height}" alt="{name}" />'
             "</a>"
         )
@@ -1085,17 +1165,24 @@ def render_wall(
     size: int = 72,
     format: str = "svg",
     faces_href: str = "",
+    caption: str = "",
 ) -> str:
     # GitHub renders <img src="*.svg"> as one picture. The README wall is
     # one polaroid <a><img></a> per person so every face stays a link.
     # From 12 people up, also print names so a small face still has credit.
     _ = (svg_href, svg_width, format)
     count = len(people)
-    html = render_html(
-        people, size=fit_readme_size(count, size), faces_href=faces_href
-    )
-    if count >= 12:
-        html += render_names(people)
+    if not people:
+        html = f"<p>{_xml(EMPTY_WALL)}</p>\n"
+    else:
+        html = render_html(
+            people, size=fit_readme_size(count, size), faces_href=faces_href
+        )
+        if count >= 12:
+            html += render_names(people)
+    line = (caption or "").strip()
+    if line:
+        html += f'<p align="center"><em>{_xml(line)}</em></p>\n'
     return html
 
 
@@ -1177,6 +1264,116 @@ def _int_env(name: str, default: int) -> int:
     return int(raw)
 
 
+def _post_json(url: str, token: str, payload: dict) -> object:
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+        "User-Agent": "readme-contributors-action",
+    }
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+    req = Request(
+        url,
+        data=json.dumps(payload).encode("utf-8"),
+        headers=headers,
+        method="POST",
+    )
+    with urlopen(req, timeout=30) as resp:
+        return json.load(resp)
+
+
+def model_settings() -> tuple[str, str, str] | None:
+    name = os.environ.get("MODEL", "").strip()
+    key = os.environ.get("MODEL_API_KEY", "").strip()
+    base = os.environ.get("MODEL_BASE_URL", "").strip().rstrip("/")
+    token = os.environ.get("GITHUB_TOKEN", "").strip()
+    low = name.lower()
+    githubish = (
+        "models.github.ai" in base
+        or "models.inference.ai.azure.com" in base
+        or low in {"github", "github-models"}
+    )
+    if githubish:
+        if not (key or token):
+            return None
+        model = (
+            name if name and low not in {"github", "github-models"} else "openai/gpt-4o-mini"
+        )
+        return (key or token, model, base or GITHUB_MODELS_URL)
+    if not key:
+        return None
+    return (key, name or "gpt-4o-mini", base or "https://api.openai.com/v1")
+
+
+def _is_grated(text: str) -> bool:
+    low = (text or "").lower()
+    if not low.strip():
+        return False
+    return not any(word in low for word in _UNSAFE)
+
+
+def ask_caption(count: int) -> str:
+    wanted = os.environ.get("CAPTION", "").strip()
+    if wanted.lower() != "auto":
+        return wanted
+    cfg = model_settings()
+    if not cfg:
+        return ""
+    key, model, base = cfg
+    system = (
+        "Write one muted G-rated sentence about a contributors wall. "
+        "Reply with JSON only: {\"caption\": \"<one sentence>\"}. "
+        "Use the count. Never invent names. No slurs, no adult content."
+    )
+    try:
+        data = _post_json(
+            f"{base.rstrip('/')}/chat/completions",
+            key,
+            {
+                "model": model,
+                "temperature": 0.3,
+                "max_tokens": 60,
+                "messages": [
+                    {"role": "system", "content": system},
+                    {
+                        "role": "user",
+                        "content": json.dumps({"people": count}),
+                    },
+                ],
+            },
+        )
+    except (URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
+        print(f"caption skipped: {exc}", file=sys.stderr)
+        return ""
+    content = ""
+    if isinstance(data, dict):
+        choices = data.get("choices") or []
+        if choices and isinstance(choices[0], dict):
+            message = choices[0].get("message")
+            if isinstance(message, dict):
+                content = str(message.get("content") or "")
+    text = content.strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json)?\s*", "", text)
+        text = re.sub(r"\s*```$", "", text)
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        match = re.search(r"\{.*\}", text, re.S)
+        if not match:
+            return ""
+        try:
+            payload = json.loads(match.group(0))
+        except json.JSONDecodeError:
+            return ""
+    if not isinstance(payload, dict):
+        return ""
+    line = str(payload.get("caption") or "").strip()
+    if not _is_grated(line):
+        return ""
+    return line
+
+
 def main() -> int:
     root = _root()
     readme = root / os.environ.get("README_PATH", "README.md")
@@ -1199,7 +1396,9 @@ def main() -> int:
     check = os.environ.get("CHECK", "").strip().lower() in {"1", "true", "yes"}
     if not repo:
         raise SystemExit("GITHUB_REPOSITORY is required (owner/name)")
-    people = list_people(repo, token, limit)
+    people = list_people(
+        repo, token, limit, exclude=os.environ.get("EXCLUDE", "")
+    )
     layout = fit_layout(wanted_layout, len(people))
     faces_dir = root / os.environ.get("FACES_PATH", ".github/faces")
     avatars: dict[str, bytes] = fetch_avatars(people, token, size) if people else {}
@@ -1229,6 +1428,7 @@ def main() -> int:
         size=size,
         format=fmt,
         faces_href=faces_href,
+        caption=ask_caption(len(people)),
     )
     updated = apply_readme(readme.read_text(encoding="utf-8"), block)
     same_readme = updated == readme.read_text(encoding="utf-8")

@@ -34,6 +34,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           # layout: tiles
           # theme: midnight
+          # exclude: ghost
+          # caption: auto
 
       - name: Push the list
         run: |

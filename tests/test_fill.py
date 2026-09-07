@@ -279,12 +279,16 @@ class FillTest(unittest.TestCase):
             format="svg",
         )
         self.assertIn(
-            '<a href="https://github.com/alice" title="Alice">', html
+            '<a href="https://github.com/alice" title="Alice" aria-label="Alice">',
+            html,
         )
         self.assertIn(
             'src="https://avatars.githubusercontent.com/alice?s=174"', html
         )
-        self.assertIn('<a href="https://github.com/bob" title="Bob">', html)
+        self.assertIn(
+            '<a href="https://github.com/bob" title="Bob" aria-label="Bob">',
+            html,
+        )
         self.assertIn('width="87"', html)
         self.assertIn('width="66"', html)
         self.assertEqual(html.count('<a href="https://github.com/'), 2)
@@ -371,9 +375,88 @@ class FillTest(unittest.TestCase):
             self.assertIn(custom_start, msg)
             self.assertIn(custom_end, msg)
 
-    def test_empty_list_is_a_blank_wall(self) -> None:
-        self.assertEqual(self.mod.render_html([]), "")
+    def test_empty_list_is_a_first_invite(self) -> None:
+        html = self.mod.render_html([])
+        wall = self.mod.render_wall([])
+        self.assertIn("Be the first to appear here.", html)
+        self.assertIn("Be the first to appear here.", wall)
+        self.assertNotIn("<table>", wall)
         self.assertIn("<svg", self.mod.render_svg([]))
+
+    def test_exclude_drops_logins_after_bots(self) -> None:
+        people = self.mod.merge_people(
+            [{"login": "alice", "name": "Alice"}, {"login": "bob", "name": "Bob"}],
+            [{"login": "cara", "name": "Cara", "type": "User"}],
+            limit=48,
+            exclude="Bob, ghost",
+        )
+        self.assertEqual(
+            [person["login"] for person in people],
+            ["alice", "cara"],
+        )
+
+    def test_sticker_keeps_short_label_and_full_name(self) -> None:
+        svg = self.mod.render_sticker_svg(
+            {"login": "alice", "name": "Alice Very Long Example"}
+        )
+        self.assertIn(self.mod._short_label("Alice Very Long Example"), svg)
+        self.assertIn('aria-label="Alice Very Long Example"', svg)
+        self.assertIn("<title>Alice Very Long Example</title>", svg)
+        self.assertNotEqual(
+            self.mod._short_label("Alice Very Long Example"),
+            "Alice Very Long Example",
+        )
+
+    def test_merged_pr_coauthors_join_the_wall(self) -> None:
+        extras = self.mod.merged_pr_people(
+            [
+                {
+                    "merged_at": "2026-09-07T08:27:53Z",
+                    "user": {"login": "HeaTTap", "type": "User"},
+                    "body": (
+                        "Thanks\n\n"
+                        "Co-authored-by: Bob <123+bob@users.noreply.github.com>\n"
+                        "Co-authored-by: dependabot[bot] "
+                        "<bot@users.noreply.github.com>\n"
+                    ),
+                }
+            ]
+        )
+        people = self.mod.merge_people(
+            [{"login": "owner", "name": "Owner"}], extras, limit=48
+        )
+        self.assertEqual(
+            [person["login"] for person in people],
+            ["owner", "HeaTTap", "bob"],
+        )
+
+    def test_caption_auto_uses_model_and_omits_junk(self) -> None:
+        env = {
+            "CAPTION": "auto",
+            "MODEL_API_KEY": "sk-test",
+            "MODEL": "gpt-4o-mini",
+        }
+        with mock.patch.dict("os.environ", env, clear=False):
+            self.mod._post_json = lambda *_a, **_k: {  # type: ignore[method-assign]
+                "choices": [
+                    {
+                        "message": {
+                            "content": '{"caption": "Twelve people shipped this."}'
+                        }
+                    }
+                ]
+            }
+            self.assertEqual(self.mod.ask_caption(12), "Twelve people shipped this.")
+            self.mod._post_json = lambda *_a, **_k: {  # type: ignore[method-assign]
+                "choices": [{"message": {"content": '{"caption": "nsfw wall"}'}}]
+            }
+            self.assertEqual(self.mod.ask_caption(12), "")
+        wall = self.mod.render_wall(
+            [{"login": "alice", "name": "Alice"}],
+            caption="Twelve people shipped this.",
+        )
+        self.assertIn("Twelve people shipped this.", wall)
+        self.assertEqual(self.mod.ask_caption(3), "")
 
     def test_trigger_actor_is_added_when_api_lags(self) -> None:
         api = [{"login": "alice", "name": "Alice"}]
@@ -453,11 +536,14 @@ class FillTest(unittest.TestCase):
                 return {"name": "Bob", "type": "User"}
             if url.endswith("/users/HeaTTap"):
                 return {"name": "HeaTTap", "type": "User"}
+            if url.endswith("/users/cara"):
+                return {"name": "Cara", "type": "User"}
             if "/pulls?" in url:
                 return [
                     {
                         "merged_at": "2026-09-07T08:27:53Z",
                         "user": {"login": "HeaTTap", "type": "User"},
+                        "body": "Co-authored-by: Cara <cara@users.noreply.github.com>",
                     }
                 ]
             raise AssertionError(url)
@@ -472,6 +558,7 @@ class FillTest(unittest.TestCase):
                 {"login": "alice", "name": "Alice"},
                 {"login": "bob", "name": "Bob"},
                 {"login": "HeaTTap", "name": "HeaTTap"},
+                {"login": "cara", "name": "Cara"},
             ],
         )
 
@@ -479,7 +566,7 @@ class FillTest(unittest.TestCase):
         """Actions ignores GITHUB_REPOSITORY in a composite env block."""
         seen: list[str] = []
 
-        def people(repo: str, _token: str, limit: int = 48):
+        def people(repo: str, _token: str, limit: int = 48, exclude: str = ""):
             seen.append(repo)
             return []
 
@@ -525,7 +612,7 @@ class FillTest(unittest.TestCase):
             }
             old = {key: __import__("os").environ.get(key) for key in env}
 
-            def people(_repo: str, _token: str, limit: int = 48):
+            def people(_repo: str, _token: str, limit: int = 48, exclude: str = ""):
                 return [{"login": "alice", "name": "Alice"}]
 
             self.mod.list_people = people  # type: ignore[method-assign]

@@ -42,6 +42,33 @@ inputs:
       Maximum people to draw (API order, bots already omitted). 0 means
       500. Default 100 so a mid-size repo still lists everyone.
     default: "100"
+  exclude:
+    description: >
+      Comma-separated GitHub logins to omit after bots are filtered.
+      Case-insensitive.
+    required: false
+    default: ""
+  caption:
+    description: >
+      Optional line under the wall. Empty (default) writes none. auto
+      writes one muted sentence when a model key is set. Any other
+      value is used as-is.
+    required: false
+    default: ""
+  model:
+    description: >
+      Optional chat model for caption=auto. Empty skips the model.
+      Set github to use GitHub Models with GITHUB_TOKEN.
+    required: false
+    default: ""
+  model-api-key:
+    description: Optional API key for an OpenAI-compatible chat endpoint.
+    required: false
+    default: ""
+  model-base-url:
+    description: Optional OpenAI-compatible API root (no /chat/completions).
+    required: false
+    default: ""
   repository:
     description: owner/name to read contributors from
     default: ${{ github.repository }}
@@ -84,6 +111,11 @@ runs:
         COLUMNS: ${{ inputs.columns }}
         AVATAR_SIZE: ${{ inputs.avatar-size }}
         MAX_PEOPLE: ${{ inputs.max }}
+        EXCLUDE: ${{ inputs.exclude }}
+        CAPTION: ${{ inputs.caption }}
+        MODEL: ${{ inputs.model }}
+        MODEL_API_KEY: ${{ inputs.model-api-key }}
+        MODEL_BASE_URL: ${{ inputs.model-base-url }}
         CHECK: ${{ inputs.check }}
         MARKER_START: ${{ inputs.marker-start }}
         MARKER_END: ${{ inputs.marker-end }}
