@@ -1093,6 +1093,20 @@ def write_faces(
             ),
             encoding="utf-8",
         )
+    prune_faces(directory, people)
+
+
+def _kept_face_names(people: list[dict[str, str]]) -> set[str]:
+    return {_face_file(person["login"]) for person in people}
+
+
+def prune_faces(directory: Path, people: list[dict[str, str]]) -> None:
+    if not directory.is_dir():
+        return
+    keep = _kept_face_names(people)
+    for path in directory.glob("*.svg"):
+        if path.name not in keep:
+            path.unlink()
 
 
 def faces_current(
@@ -1102,6 +1116,13 @@ def faces_current(
     *,
     size: int = 72,
 ) -> bool:
+    keep = _kept_face_names(people)
+    if directory.is_dir():
+        leftover = [path for path in directory.glob("*.svg") if path.name not in keep]
+        if leftover:
+            return False
+    elif people:
+        return False
     pictures = avatars or {}
     for index, person in enumerate(people):
         path = directory / _face_file(person["login"])

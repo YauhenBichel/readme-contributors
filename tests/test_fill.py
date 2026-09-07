@@ -49,6 +49,7 @@ class FillTest(unittest.TestCase):
         self.assertIn("The wall is still the people the contributors API lists", text)
         self.assertIn("Zero-config leaves the wall with no caption", text)
         self.assertIn("Filled from the GitHub contributors API", text)
+        self.assertIn("Stale files are removed when a login leaves the wall", text)
         self.assertIn("## Examples", text)
         self.assertIn("## Used by", text)
         self.assertIn("YauhenBichel/py-harness", text)
@@ -308,6 +309,38 @@ class FillTest(unittest.TestCase):
         )
         self.assertIn('src=".github/faces/alice.svg"', html)
         self.assertIn('href="https://github.com/alice"', html)
+
+    def test_write_faces_deletes_orphan_svgs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            (directory / "ghost.svg").write_text("<svg></svg>", encoding="utf-8")
+            (directory / "notes.txt").write_text("keep", encoding="utf-8")
+            nested = directory / "nested"
+            nested.mkdir()
+            nested_svg = nested / "old.svg"
+            nested_svg.write_text("<svg></svg>", encoding="utf-8")
+            self.mod.write_faces(directory, [{"login": "alice", "name": "Alice"}])
+            self.assertTrue((directory / "alice.svg").is_file())
+            self.assertFalse((directory / "ghost.svg").exists())
+            self.assertTrue((directory / "notes.txt").is_file())
+            self.assertTrue(nested_svg.is_file())
+
+    def test_empty_wall_clears_face_svgs(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            (directory / "ghost.svg").write_text("<svg></svg>", encoding="utf-8")
+            self.mod.write_faces(directory, [])
+            self.assertEqual(list(directory.glob("*.svg")), [])
+
+    def test_faces_current_is_false_when_an_orphan_remains(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            people = [{"login": "alice", "name": "Alice"}]
+            self.mod.write_faces(directory, people)
+            (directory / "ghost.svg").write_text("<svg></svg>", encoding="utf-8")
+            self.assertFalse(self.mod.faces_current(directory, people))
+            self.mod.prune_faces(directory, people)
+            self.assertTrue(self.mod.faces_current(directory, people))
 
     def test_contributors_workflow_opens_a_pull_request(self) -> None:
         text = (ROOT / ".github" / "workflows" / "contributors.yml").read_text(
