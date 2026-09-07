@@ -377,6 +377,7 @@
         <a href="#live">Live demo</a>
         <a href="#use">How</a>
         <a href="#ai">AI</a>
+        <a href="#cases">Cases</a>
         <a href="#model">Model</a>
         <a href="#credits">Credits</a>
         <a href="#used-by">Examples</a>
@@ -436,8 +437,9 @@
       <div class="panel" id="what">
         <h2>What</h2>
         <p>
-          A GitHub Action that fills a README with the people who committed.
-          Each person is a polaroid: face, name, a bit of tilt. Each card is
+          A GitHub Action that fills a README with the people the GitHub
+          contributors API lists (plus merged-PR authors when that list is
+          behind). Each person is a polaroid: face, name, a bit of tilt. Each card is
           its own link. Bots are omitted. <code>exclude</code> drops named
           logins. Merged PR <code>Co-authored-by</code> trailers join the wall.
           An empty list writes “Be the first to appear here.” Hover a cut
@@ -495,8 +497,9 @@
           </video>
         </div>
       </div>
-      <p class="note">The wall is still the people who committed. One polaroid per person. The model adds one italic sentence that names this repository or those people. A headcount is not a story. A caption that says who showed up is.</p>
-      <p class="note"><strong>What.</strong> The wall is still the people who committed. The model writes one italic line that names this repository or those people.</p>
+      <p class="note">This is the model path. Zero-config leaves the wall with no caption.</p>
+      <p class="note">The wall is still the people the contributors API lists. One polaroid per person. The model adds one italic sentence that names this repository or those people.</p>
+      <p class="note"><strong>What.</strong> The wall is still the people the contributors API lists. The model writes one italic line that names this repository or those people.</p>
       <p class="note"><strong>Why.</strong> A headcount is not a story. A caption that says who showed up is.</p>
       <p class="note"><strong>How.</strong> <code>caption: auto</code> and <code>gpt-4o-mini</code>. Same people next week? The line is reused. No extra credits.</p>
       <figure class="shot">
@@ -505,6 +508,20 @@
         </a>
         <figcaption>Live on the Action README. <em>The contributors to the py-harness project include Yauhen Bichel, Mark Xian, Itzsaurav, svkzn, Aditya, and Huangshuo Kuang.</em></figcaption>
       </figure>
+    </section>
+
+    <section>
+      <h2 id="cases">Cases</h2>
+      <p class="note">The Action already handles these. The videos above are two of them.</p>
+      <p class="note"><strong>Empty wall.</strong> “Be the first to appear here.”</p>
+      <p class="note"><strong>README polaroids.</strong> One clickable card per person. That is the wall GitHub can tap.</p>
+      <p class="note"><strong>Pages SVG.</strong> <code>layout</code> and <code>theme</code> change the combined SVG only. Not the README cards.</p>
+      <p class="note"><strong>12+ / 50+.</strong> Faces shrink. A name list is added from 12 people.</p>
+      <p class="note"><strong>exclude.</strong> Named logins dropped after bots.</p>
+      <p class="note"><strong>No caption.</strong> Zero-config. The wall is still written.</p>
+      <p class="note"><strong>caption: auto.</strong> One italic sentence. Same people next week? The line is reused.</p>
+      <p class="note"><strong>format: html.</strong> Polaroids only. Skips <code>.github/contributors.svg</code>.</p>
+      <p class="note"><strong>Protected main.</strong> Open a pull request. Copy <a href="https://github.com/YauhenBichel/readme-contributors/blob/main/examples/contributors.yml">examples/contributors.yml</a>.</p>
     </section>
 
     <section>
@@ -588,8 +605,8 @@ jobs:
           git commit -m "docs: refresh README contributors"
           git push</pre>
       <p class="note">
-        A protected default branch should open a pull request instead of pushing.
-        A copy-paste job is in
+        The snippet above pushes, for an unprotected default branch.
+        A protected default branch should open a pull request — copy
         <a href="https://github.com/YauhenBichel/readme-contributors/blob/main/examples/contributors.yml">examples/contributors.yml</a>.
         Set <code>exclude</code> to omit logins. An empty wall writes
         “Be the first to appear here.” <code>caption: auto</code> writes one
@@ -636,7 +653,7 @@ jobs:
 
     <section>
       <h2 id="layouts">Layouts</h2>
-      <p class="note">Set <code>layout</code>. The default stays the overlapping facepile. The README wall is always the clickable polaroids.</p>
+      <p class="note">Set <code>layout</code>. The default stays the overlapping facepile. These drawings are Pages art. The README wall is always the clickable polaroids.</p>
       <div class="grid three">
         <article>
           <h3>stickers</h3>
