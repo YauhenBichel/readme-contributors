@@ -5,9 +5,9 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
 [![GitHub Marketplace](https://img.shields.io/badge/GitHub%20Marketplace-v1.5.1-6e5494)](https://github.com/marketplace/actions/readme-contributors)
 [![Examples](https://img.shields.io/badge/examples-GitHub%20Pages-0969da)](https://yauhenbichel.github.io/readme-contributors/)
-Marketplace: [readme-contributors](https://github.com/marketplace/actions/readme-contributors) · Site: [yauhenbichel.github.io/readme-contributors](https://yauhenbichel.github.io/readme-contributors/)
-
 [![good first issue](https://img.shields.io/github/issues/YauhenBichel/readme-contributors/good%20first%20issue)](https://github.com/YauhenBichel/readme-contributors/labels/good%20first%20issue)
+
+Marketplace: [readme-contributors](https://github.com/marketplace/actions/readme-contributors) · Site: [yauhenbichel.github.io/readme-contributors](https://yauhenbichel.github.io/readme-contributors/)
 
 A **GitHub Action** that draws a **contributors** wall into your
 **README**: one clickable **polaroid sticker** per person (face plus
