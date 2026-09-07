@@ -296,6 +296,29 @@ class FillTest(unittest.TestCase):
         out = self.mod.apply_readme(text, "new\n")
         self.assertEqual(out, f"before\n{start}\nnew\n{end}\nafter\n")
 
+    def test_apply_readme_missing_markers_exits_with_example(self) -> None:
+        start = self.mod.DEFAULT_START
+        end = self.mod.DEFAULT_END
+        for bad_text in ["# Just title\n", f"# Only start\n{start}\n", f"# Only end\n{end}\n"]:
+            with self.subTest(bad_text=bad_text):
+                with self.assertRaises(SystemExit) as ctx:
+                    self.mod.apply_readme(bad_text, "new\n")
+                self.assertNotEqual(ctx.exception.code, 0)
+                msg = str(ctx.exception)
+                self.assertIn(start, msg)
+                self.assertIn(end, msg)
+
+    def test_apply_readme_missing_markers_includes_custom_markers(self) -> None:
+        custom_start = "<!-- custom-start -->"
+        custom_end = "<!-- custom-end -->"
+        with mock.patch.dict("os.environ", {"MARKER_START": custom_start, "MARKER_END": custom_end}):
+            with self.assertRaises(SystemExit) as ctx:
+                self.mod.apply_readme("# Just title\n", "new\n")
+            self.assertNotEqual(ctx.exception.code, 0)
+            msg = str(ctx.exception)
+            self.assertIn(custom_start, msg)
+            self.assertIn(custom_end, msg)
+
     def test_empty_list_is_a_blank_wall(self) -> None:
         self.assertEqual(self.mod.render_html([]), "")
         self.assertIn("<svg", self.mod.render_svg([]))
