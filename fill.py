@@ -537,12 +537,26 @@ def _theme_css(theme: Mapping[str, str]) -> list[str]:
     return lines
 
 
+def parse_overlap(raw: str = "") -> float:
+    text = (raw or "").strip()
+    if not text:
+        return 0.64
+    try:
+        value = float(text)
+    except ValueError as exc:
+        raise SystemExit("overlap must be a number") from exc
+    if value <= 0:
+        raise SystemExit("overlap must be greater than 0")
+    return value
+
+
 def _placements(
     layout: str,
     count: int,
     size: int,
     columns: int,
     framed: bool,
+    overlap: float = 0.64,
 ) -> tuple[int, int, list[tuple[int, float, float, int]]]:
     """Return canvas size and (index, x, y, face_size) for each person."""
     columns = max(1, columns)
@@ -553,7 +567,7 @@ def _placements(
 
     if layout == "facepile":
         pad = 10 if framed else 4
-        step = int(size * 0.64)
+        step = int(size * overlap)
         row_gap = 14
         rows = (count + columns - 1) // columns
         widest = min(columns, count)
@@ -857,6 +871,7 @@ def render_svg(
     columns: int = 8,
     layout: str = "facepile",
     theme: str = "auto",
+    overlap: float = 0.64,
 ) -> str:
     """Draw the wall. Each face is a link to that person's GitHub profile."""
     layout = fit_layout(layout, len(people))
@@ -870,7 +885,7 @@ def render_svg(
     pictures = avatars or {}
     framed = bool(palette.get("bg"))
     width, height, spots = _placements(
-        layout, len(people), size, columns, framed
+        layout, len(people), size, columns, framed, overlap
     )
     names = ", ".join(person["name"] for person in people)
     defs: list[str] = _theme_css(palette)
@@ -1222,6 +1237,7 @@ def svg_width(
     columns: int,
     layout: str = "facepile",
     theme: str = "auto",
+    overlap: float = 0.64,
 ) -> int:
     if not people:
         return 1
@@ -1229,7 +1245,7 @@ def svg_width(
     theme_name = parse_theme(theme)
     framed = bool(THEMES[theme_name].get("bg"))
     width, _height, _spots = _placements(
-        layout, len(people), size, columns, framed
+        layout, len(people), size, columns, framed, overlap
     )
     return width
 
@@ -1564,6 +1580,7 @@ def main() -> int:
     fmt = os.environ.get("FORMAT", "svg").strip().lower() or "svg"
     columns = _int_env("COLUMNS", 8)
     size = _int_env("AVATAR_SIZE", 72)
+    overlap = parse_overlap(os.environ.get("OVERLAP", ""))
     limit = _int_env("MAX_PEOPLE", 100)
     if limit <= 0:
         limit = 500
@@ -1589,11 +1606,14 @@ def main() -> int:
             columns=columns,
             layout=layout,
             theme=theme,
+            overlap=overlap,
         )
         href = Path(os.path.relpath(svg_path, start=readme.parent)).as_posix()
         if not href.startswith("."):
             href = f"./{href}"
-        width = svg_width(people, size, columns, layout=layout, theme=theme)
+        width = svg_width(
+            people, size, columns, layout=layout, theme=theme, overlap=overlap
+        )
     faces_href = Path(os.path.relpath(faces_dir, start=readme.parent)).as_posix()
     if not faces_href.startswith("."):
         faces_href = f"./{faces_href}"

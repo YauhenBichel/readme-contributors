@@ -366,6 +366,7 @@ No token, no GPU, no extra packages. `fill.py` is stdlib only.
 | `theme` | `auto` | `auto`, `github`, `midnight`, `sunrise`, `forest`, `ocean`, `mono` |
 | `columns` | `8` | Faces per row |
 | `avatar-size` | `72` | Face diameter, pixels |
+| `overlap` | `0.64` | Facepile step as a fraction of `avatar-size`. `1` sits faces side by side. Pages SVG only |
 | `max` | `100` | Cap after bots are omitted. `0` means 500. Contributor and closed-PR lists are paged up to the cap |
 | `exclude` | empty | Comma-separated logins to omit (case-insensitive, after bots) |
 | `caption` | empty | `auto` writes one sentence that names the repo or people when a model key is set. A still-valid line is reused when the people list is unchanged |

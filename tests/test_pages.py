@@ -26,6 +26,7 @@ class PagesTest(unittest.TestCase):
         self.assertIn("id=\"ai\"", text)
         self.assertIn("id=\"cases\"", text)
         self.assertIn("Orphan faces", text)
+        self.assertIn("sits faces side by side", text)
         self.assertIn("./media/readme-contributors-ai-demo.mp4", text)
         self.assertIn("./media/readme-contributors-ai-real.png", text)
         self.assertIn("The wall is still the people the contributors API lists", text)
