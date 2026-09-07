@@ -44,6 +44,7 @@ class FillTest(unittest.TestCase):
         self.assertIn("## What", text)
         self.assertIn("## Why", text)
         self.assertIn("## How", text)
+        self.assertIn("### Keep credits low", text)
         self.assertIn("## Examples", text)
         self.assertIn("## Used by", text)
         self.assertIn("YauhenBichel/py-harness", text)
@@ -480,6 +481,7 @@ class FillTest(unittest.TestCase):
         wall = self.mod.render_wall(
             [{"login": "alice", "name": "Alice"}],
             caption="Twelve people keep py-harness honest.",
+<<<<<<< Updated upstream
         )
         self.assertIn("Twelve people keep py-harness honest.", wall)
         self.assertEqual(self.mod.ask_caption(people[:3]), "")
@@ -500,6 +502,96 @@ class FillTest(unittest.TestCase):
                 "YauhenBichel/readme-contributors",
             )
         )
+=======
+        )
+        self.assertIn("Twelve people keep py-harness honest.", wall)
+        self.assertEqual(self.mod.ask_caption(people[:3]), "")
+        self.assertFalse(
+            self.mod.caption_is_specific(
+                "The contributors wall showcases the efforts of 2 dedicated individuals.",
+                people[:2],
+                "YauhenBichel/readme-contributors",
+            )
+        )
+        self.assertTrue(
+            self.mod.caption_is_specific(
+                "Yauhen Bichel and HeaTTap keep readme-contributors current.",
+                [
+                    {"login": "YauhenBichel", "name": "Yauhen Bichel"},
+                    {"login": "HeaTTap", "name": "HeaTTap"},
+                ],
+                "YauhenBichel/readme-contributors",
+            )
+        )
+
+    def test_caption_reuses_specific_line_when_roster_matches(self) -> None:
+        people = [
+            {"login": "YauhenBichel", "name": "Yauhen Bichel"},
+            {"login": "HeaTTap", "name": "HeaTTap"},
+        ]
+        line = "Yauhen Bichel and HeaTTap keep readme-contributors current."
+        wall = self.mod.render_wall(people, format="html", caption=line)
+        text = f"{self.mod.DEFAULT_START}\n{wall}{self.mod.DEFAULT_END}\n"
+        env = {
+            "CAPTION": "auto",
+            "MODEL_API_KEY": "sk-test",
+            "MODEL": "gpt-4o-mini",
+        }
+
+        def boom(*_a, **_k):
+            raise AssertionError("model should not be called")
+
+        with mock.patch.dict("os.environ", env, clear=False):
+            self.mod._post_json = boom  # type: ignore[method-assign]
+            self.assertEqual(
+                self.mod.resolve_caption(
+                    people, "YauhenBichel/readme-contributors", text
+                ),
+                line,
+            )
+            stock = self.mod.render_wall(
+                people,
+                format="html",
+                caption=(
+                    "The contributors wall showcases the efforts of "
+                    "2 dedicated individuals."
+                ),
+            )
+            stock_text = f"{self.mod.DEFAULT_START}\n{stock}{self.mod.DEFAULT_END}\n"
+            seen: list[dict] = []
+
+            def fake(_url, _key, payload):
+                seen.append(payload)
+                return {
+                    "choices": [
+                        {
+                            "message": {
+                                "content": (
+                                    '{"caption": "Yauhen Bichel ships '
+                                    'readme-contributors."}'
+                                )
+                            }
+                        }
+                    ]
+                }
+
+            self.mod._post_json = fake  # type: ignore[method-assign]
+            self.assertEqual(
+                self.mod.resolve_caption(
+                    people, "YauhenBichel/readme-contributors", stock_text
+                ),
+                "Yauhen Bichel ships readme-contributors.",
+            )
+            self.assertEqual(seen[0]["temperature"], 0)
+            extra = people + [{"login": "alice", "name": "Alice"}]
+            self.assertEqual(
+                self.mod.resolve_caption(
+                    extra, "YauhenBichel/readme-contributors", text
+                ),
+                "Yauhen Bichel ships readme-contributors.",
+            )
+            self.assertEqual(len(seen), 2)
+>>>>>>> Stashed changes
 
     def test_trigger_actor_is_added_when_api_lags(self) -> None:
         api = [{"login": "alice", "name": "Alice"}]
