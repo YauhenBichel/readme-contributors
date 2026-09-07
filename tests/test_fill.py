@@ -314,6 +314,8 @@ class FillTest(unittest.TestCase):
         self.assertNotIn("--jq .number", text)
         self.assertIn("pull-requests: write", text)
         self.assertIn("format: html", text)
+        self.assertIn("caption: auto", text)
+        self.assertIn("secrets.OPENAI_API_KEY", text)
         self.assertIn(".github/faces", text)
         self.assertNotIn("git push\n", text.replace("git push --force", ""))
 
