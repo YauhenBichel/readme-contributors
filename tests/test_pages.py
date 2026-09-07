@@ -12,7 +12,10 @@ SITE = ROOT / "docs" / "index.html"
 class PagesTest(unittest.TestCase):
     def test_site_explains_how_to_use_the_action(self) -> None:
         text = SITE.read_text(encoding="utf-8")
-        self.assertIn("uses: YauhenBichel/readme-contributors@v1.6.0", text)
+        self.assertIn("uses: YauhenBichel/readme-contributors@v1.7.0", text)
+        self.assertIn("exclude", text)
+        self.assertIn("caption: auto", text)
+        self.assertIn("Be the first to appear here.", text)
         self.assertIn("&lt;!-- readme: contributors,bots/- -start --&gt;", text)
         self.assertIn("layout: stickers", text)
         self.assertIn("layout: orbit", text)
