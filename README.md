@@ -52,7 +52,7 @@ GitHub profile.
 2. Call the Action. Pin the tag to read. Pin the SHA if the job can write:
 
 ```yaml
-- uses: YauhenBichel/readme-contributors@efb37982d140840e9698014f756d9345ceb3ab4c # v1.6.0
+- uses: YauhenBichel/readme-contributors@ad89c96e4f83262c40804087ffafcfe0e08ade06 # v1.6.0
   with:
     token: ${{ secrets.GITHUB_TOKEN }}
     format: html
@@ -257,7 +257,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: YauhenBichel/readme-contributors@efb37982d140840e9698014f756d9345ceb3ab4c # v1.6.0
+      - uses: YauhenBichel/readme-contributors@ad89c96e4f83262c40804087ffafcfe0e08ade06 # v1.6.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           # layout: tiles
