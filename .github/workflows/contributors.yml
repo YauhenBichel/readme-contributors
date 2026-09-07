@@ -45,6 +45,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           format: html
+          exclude: ghost
 
       - name: Land the refresh on main
         env:
