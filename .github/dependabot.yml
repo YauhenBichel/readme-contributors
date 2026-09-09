@@ -1,0 +1,20 @@
+# GitHub Actions is the only ecosystem here. The action is composite, fill.py
+# imports nothing outside the standard library, and there is no requirements
+# file, pyproject or Dockerfile for Dependabot to read.
+#
+# That makes this file the thing that keeps the SHA pins in the workflows
+# current. A pinned action is only safe if something moves the pin when the
+# action is fixed, and this is that something.
+#
+# Monthly, because these are five small workflows on a public repository and
+# a weekly pull request for a digest bump is noise. Security updates are not
+# on this schedule and arrive as soon as an advisory lands.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ['*']
