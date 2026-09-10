@@ -27,12 +27,20 @@ _MD_IMAGE = re.compile(r"!\[[^\]]*\]\(([^)\s]+)")
 
 
 def _local_paths(text: str) -> list[str]:
+    """Local image paths, with any leading ./ removed.
+
+    fill.py writes hrefs relative to the README and prefixes them with ./ when
+    they do not already start with a dot, so the wall it generates says
+    "./docs/faces/x.svg" while the same file on disk is "docs/faces/x.svg".
+    Comparing the two forms directly is how this test first failed on main.
+    """
     found = _HTML_SRC.findall(text) + _MD_IMAGE.findall(text)
-    return [
+    local = [
         p
         for p in found
         if not p.startswith(("http://", "https://", "data:", "#", "mailto:"))
     ]
+    return [p[2:] if p.startswith("./") else p for p in local]
 
 
 class ReadmeImagesTest(unittest.TestCase):
