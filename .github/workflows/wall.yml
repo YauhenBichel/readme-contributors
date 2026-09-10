@@ -1,0 +1,115 @@
+name: Contributors wall
+
+# A reusable workflow, so the repositories that draw a wall call this instead of
+# each keeping their own copy of the same twenty lines.
+#
+# Sixteen copies drifted. Every one of them ran:
+#
+#   git add README.md README readme.md .github/contributors.svg
+#
+# git add aborts on the first pathspec matching nothing, and none of those
+# repositories has a file called README, so the step died with exit 128 before
+# it could commit. Sixteen red Actions tabs and sixteen empty walls, from one
+# line nobody had a reason to look at twice.
+#
+# Call it like this, from .github/workflows/contributors.yml:
+#
+#   name: Contributors
+#   on:
+#     schedule:
+#       - cron: "17 4 * * 0"
+#     workflow_dispatch:
+#     push:
+#       branches: [main]
+#   permissions:
+#     contents: write
+#   jobs:
+#     wall:
+#       uses: YauhenBichel/readme-contributors/.github/workflows/wall.yml@v1
+#       secrets: inherit
+#
+# `secrets: inherit` passes OPENAI_API_KEY through when the caller has one. A
+# caller without it still works; the caption falls back to the stdlib path.
+
+on:
+  workflow_call:
+    inputs:
+      repository:
+        description: Draw the wall for a different repository than the caller
+        required: false
+        type: string
+        default: ""
+      format:
+        description: html or svg
+        required: false
+        type: string
+        default: html
+      caption:
+        description: auto, off, or a fixed line
+        required: false
+        type: string
+        default: auto
+      model:
+        description: Chat model for the caption. Empty uses the stdlib path
+        required: false
+        type: string
+        default: ""
+      exclude:
+        description: Comma-separated logins to leave off the wall
+        required: false
+        type: string
+        default: ""
+    secrets:
+      OPENAI_API_KEY:
+        description: Key for `model`. Omit to use the stdlib caption
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  wall:
+    # Without this the bot's own commit triggers another run, which commits
+    # again, forever.
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: true
+
+      - uses: YauhenBichel/readme-contributors@06d127a2e5ea32a9d8d6c4a00944d14cf6ea239e # v1.7.0
+        with:
+          token: ${{ github.token }}
+          repository: ${{ inputs.repository }}
+          format: ${{ inputs.format }}
+          caption: ${{ inputs.caption }}
+          model: ${{ inputs.model }}
+          model-api-key: ${{ secrets.OPENAI_API_KEY }}
+          exclude: ${{ inputs.exclude }}
+
+      - name: Commit whatever the wall wrote
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+
+          # Collect the paths that exist rather than naming them all to git add,
+          # which aborts on the first one that matches nothing. Written as an if
+          # rather than `[ -e x ] && git add x`, because that returns 1 when the
+          # file is absent and under bash -e would end the step on the last line.
+          paths=""
+          for candidate in README.md .github/contributors.svg .github/faces; do
+            if [ -e "$candidate" ]; then
+              paths="$paths $candidate"
+            fi
+          done
+          if [ -z "$paths" ]; then
+            echo "Nothing the wall writes to exists in this repository."
+            exit 0
+          fi
+
+          git add -- $paths
+          git diff --cached --quiet && exit 0
+          git commit -m "docs: refresh README contributors"
+          git push
