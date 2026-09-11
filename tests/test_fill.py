@@ -412,6 +412,10 @@ class FillTest(unittest.TestCase):
         # main can move while it runs.
         self.assertIn("git pull --rebase", text)
         self.assertNotIn("gh pr create", text)
+        # The markers can live elsewhere: an organisation profile keeps them in
+        # profile/README.md. Whatever the action fills is what gets committed.
+        self.assertIn("readme: ${{ inputs.readme }}", text)
+        self.assertIn('for candidate in "$README_PATH"', text)
         # The sixteen-empty-walls bug must not come back. The header comment
         # quotes the bad line as history, so only commands are checked.
         commands = "\n".join(l for l in text.splitlines() if not l.lstrip().startswith("#"))
