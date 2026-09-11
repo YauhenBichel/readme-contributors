@@ -12,15 +12,23 @@ name: Contributors wall
 # it could commit. Sixteen red Actions tabs and sixteen empty walls, from one
 # line nobody had a reason to look at twice.
 #
+# The wall is written straight to the default branch, never through a separate
+# pull request, and only from a run on that branch. A wall drawn on a pull
+# request branch goes stale the moment anything else merges first: a fork's
+# pull request cannot run it at all, and a same-repository one then lands a
+# wall computed before the fork merged, erasing that contributor. That is how
+# MoleCare/molecare-mcp lost a contributor in 44 seconds. A run after the merge
+# sees every commit.
+#
 # Call it like this, from .github/workflows/contributors.yml:
 #
 #   name: Contributors
 #   on:
+#     push:
+#       branches: [main]
 #     schedule:
 #       - cron: "17 4 * * 0"
 #     workflow_dispatch:
-#     push:
-#       branches: [main]
 #   permissions:
 #     contents: write
 #   jobs:
@@ -28,8 +36,16 @@ name: Contributors wall
 #       uses: YauhenBichel/readme-contributors/.github/workflows/wall.yml@v1
 #       secrets: inherit
 #
-# `secrets: inherit` passes OPENAI_API_KEY through when the caller has one. A
-# caller without it still works; the caption falls back to the stdlib path.
+# `secrets: inherit` passes two optional secrets through:
+#
+#   OPENAI_API_KEY           the caption. Without it, the stdlib caption.
+#   CONTRIBUTORS_DEPLOY_KEY  a write deploy key, for a protected default
+#                            branch. Without it the wall pushes with the
+#                            workflow token, which a protected branch refuses.
+#
+# For a protected branch: add a write deploy key to the repository, store its
+# private half as CONTRIBUTORS_DEPLOY_KEY, and let deploy keys bypass the
+# branch ruleset. Nothing else changes.
 
 on:
   workflow_call:
@@ -63,20 +79,46 @@ on:
       OPENAI_API_KEY:
         description: Key for `model`. Omit to use the stdlib caption
         required: false
+      CONTRIBUTORS_DEPLOY_KEY:
+        description: Write deploy key, for a default branch the workflow token cannot push to
+        required: false
 
 permissions:
   contents: write
 
 jobs:
   wall:
-    # Without this the bot's own commit triggers another run, which commits
-    # again, forever.
-    if: github.actor != 'github-actions[bot]'
+    # The bot's own commit must not start another run. And a pull request is the
+    # wrong place for a wall: see the note at the top.
+    if: >-
+      github.actor != 'github-actions[bot]'
+      && github.event_name != 'pull_request'
+      && github.event_name != 'pull_request_target'
+    # A merge and a scheduled run can land together. Each recomputes the wall
+    # from scratch, so the newest can safely replace one still in flight, and
+    # only one of them ever pushes.
+    concurrency:
+      group: contributors-wall-${{ github.repository }}
+      cancel-in-progress: true
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
+      # Asked of the API rather than read from github.event.repository, which a
+      # scheduled run's payload does not carry: the expression is empty on every
+      # cron run. Asked at all, rather than taking the triggering ref, so a
+      # manual run started from a side branch still repairs the default branch.
+      - name: Find the default branch
+        id: target
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: echo "branch=$(gh api "repos/$GITHUB_REPOSITORY" -q .default_branch)" >> "$GITHUB_OUTPUT"
+
+      # An empty ssh-key makes checkout use the workflow token, so a caller
+      # without the deploy key gets exactly the old behaviour.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          ref: ${{ steps.target.outputs.branch }}
+          ssh-key: ${{ secrets.CONTRIBUTORS_DEPLOY_KEY }}
           persist-credentials: true
 
       - uses: YauhenBichel/readme-contributors@06d127a2e5ea32a9d8d6c4a00944d14cf6ea239e # v1.7.0
@@ -89,7 +131,10 @@ jobs:
           model-api-key: ${{ secrets.OPENAI_API_KEY }}
           exclude: ${{ inputs.exclude }}
 
-      - name: Commit whatever the wall wrote
+      - name: Commit whatever the wall wrote to the default branch
+        env:
+          BRANCH: ${{ steps.target.outputs.branch }}
+          WITH_DEPLOY_KEY: ${{ secrets.CONTRIBUTORS_DEPLOY_KEY != '' }}
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
@@ -110,6 +155,41 @@ jobs:
           fi
 
           git add -- $paths
-          git diff --cached --quiet && exit 0
-          git commit -m "docs: refresh README contributors"
-          git push
+          if git diff --cached --quiet; then
+            echo "The wall already matches the contributors API."
+            exit 0
+          fi
+
+          # Name who joined, so the history says why the commit exists.
+          added=$(git diff --cached --name-only --diff-filter=A -- .github/faces 2>/dev/null \
+            | sed 's#.*/##; s#\.svg$##' | paste -sd, - | sed 's/,/, /g')
+          message="docs: refresh README contributors${added:+ (adds $added)}"
+          # A push made with the workflow token starts no workflows. One made
+          # with a deploy key does, so it carries the marker that skips them:
+          # neither CI nor this wall should run again for a README-only change.
+          if [ "$WITH_DEPLOY_KEY" = "true" ]; then
+            message="$message [skip ci]"
+          fi
+          git commit -m "$message"
+
+          # The default branch can move while this runs. The commit touches only
+          # the wall, which was just recomputed, so replaying it on the new tip
+          # is safe.
+          for attempt in 1 2 3; do
+            if git push origin "HEAD:$BRANCH"; then
+              echo "Wall updated on $BRANCH${added:+: added $added}."
+              exit 0
+            fi
+            if ! git pull --rebase origin "$BRANCH"; then
+              git rebase --abort || true
+              echo "::error::$BRANCH changed the wall's files while this ran, and the rebase conflicted. The next run will recompute it."
+              exit 1
+            fi
+          done
+
+          if [ "$WITH_DEPLOY_KEY" = "true" ]; then
+            echo "::error::The deploy key could not push to $BRANCH. Check it has write access and that deploy keys may bypass the $BRANCH ruleset."
+          else
+            echo "::error::The workflow token could not push to $BRANCH, which is usually a protected branch. Add a write deploy key as CONTRIBUTORS_DEPLOY_KEY and let deploy keys bypass the $BRANCH ruleset."
+          fi
+          exit 1

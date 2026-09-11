@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import importlib.util
 import tempfile
 import unittest
@@ -365,28 +366,56 @@ class FillTest(unittest.TestCase):
             self.mod.prune_faces(directory, people)
             self.assertTrue(self.mod.faces_current(directory, people))
 
-    def test_contributors_workflow_opens_a_pull_request(self) -> None:
+    def test_contributors_workflow_pushes_straight_to_main(self) -> None:
+        # The wall lands on main with no separate pull request. It used to open
+        # one and auto-merge it, which needed Actions to be allowed to create
+        # pull requests and left a bot PR in the history for every refresh.
         text = (ROOT / ".github" / "workflows" / "contributors.yml").read_text(
             encoding="utf-8"
         )
-        self.assertIn("gh pr create", text)
-        self.assertIn("gh pr merge", text)
-        self.assertIn('gh pr merge "$NUMBER" --squash --auto || gh pr merge "$NUMBER" --squash', text)
-        self.assertNotIn("--jq .number", text)
-        self.assertIn("pull-requests: write", text)
+        self.assertNotIn("gh pr create", text)
+        self.assertNotIn("gh pr merge", text)
+        self.assertNotIn("pull-requests: write", text)
+        self.assertIn("ssh-key: ${{ secrets.CONTRIBUTORS_DEPLOY_KEY }}", text)
+        self.assertIn("git push origin HEAD:main", text)
+        # A deploy-key push starts workflows; the refresh must not re-run CI.
+        self.assertIn("[skip ci]", text)
         self.assertIn("format: html", text)
         self.assertIn("caption: auto", text)
         self.assertIn("secrets.OPENAI_API_KEY", text)
         self.assertIn(".github/faces", text)
-        self.assertNotIn("git push\n", text.replace("git push --force", ""))
 
-    def test_example_workflow_opens_a_pull_request(self) -> None:
+    def test_example_workflow_calls_the_reusable_wall(self) -> None:
         text = (ROOT / "examples" / "contributors.yml").read_text(encoding="utf-8")
-        self.assertIn("gh pr create", text)
-        self.assertIn("gh pr merge", text)
-        self.assertIn("pull-requests: write", text)
-        self.assertIn(".github/faces", text)
-        self.assertNotIn("git push\n", text.replace("git push --force", ""))
+        self.assertIn("uses: YauhenBichel/readme-contributors/.github/workflows/wall.yml@v1", text)
+        self.assertIn("secrets: inherit", text)
+        self.assertIn("branches: [main]", text)
+        self.assertNotIn("gh pr create", text)
+        # A pull_request trigger is how a wall goes stale: see wall.yml.
+        self.assertIsNone(re.search(r"^\s*pull_request(_target)?:", text, re.M))
+
+    def test_reusable_wall_writes_to_the_default_branch_only(self) -> None:
+        text = (ROOT / ".github" / "workflows" / "wall.yml").read_text(encoding="utf-8")
+        # Asked of the API: a scheduled run's payload has no repository, so
+        # github.event.repository.default_branch is empty on every cron run.
+        self.assertIn('gh api "repos/$GITHUB_REPOSITORY" -q .default_branch', text)
+        self.assertNotIn("github.event.repository.default_branch", text)
+        self.assertIn('git push origin "HEAD:$BRANCH"', text)
+        # A wall drawn on a pull request branch lands stale; never draw it there.
+        self.assertIn("github.event_name != 'pull_request'", text)
+        self.assertIn("github.event_name != 'pull_request_target'", text)
+        # Protected branches push through an optional deploy key.
+        self.assertIn("CONTRIBUTORS_DEPLOY_KEY:", text)
+        self.assertIn("ssh-key: ${{ secrets.CONTRIBUTORS_DEPLOY_KEY }}", text)
+        # Skip-ci only when the deploy key pushed; a token push starts nothing.
+        self.assertIn('if [ "$WITH_DEPLOY_KEY" = "true" ]; then', text)
+        # main can move while it runs.
+        self.assertIn("git pull --rebase", text)
+        self.assertNotIn("gh pr create", text)
+        # The sixteen-empty-walls bug must not come back. The header comment
+        # quotes the bad line as history, so only commands are checked.
+        commands = "\n".join(l for l in text.splitlines() if not l.lstrip().startswith("#"))
+        self.assertNotIn("README readme.md", commands)
 
     def test_display_names_are_escaped(self) -> None:
         nasty = [{"login": "eve", "name": "<script>alert(1)</script>"}]

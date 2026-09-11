@@ -1,9 +1,14 @@
 name: Contributors
 
 # Refreshes the live demo (py-harness faces) and this repository's own
-# wall, then merges the pull request so main updates by itself.
-# Needs Settings → Actions → General → Allow GitHub Actions to create
-# and approve pull requests.
+# wall, and commits both straight to main — no separate pull request. It
+# used to open one and auto-merge it, which needed Actions to be allowed to
+# create pull requests and put a bot PR in the history for every refresh.
+#
+# main is protected, so the push goes through a write deploy key,
+# CONTRIBUTORS_DEPLOY_KEY, the one bypass actor on the main ruleset besides
+# the owner. A deploy-key push starts workflows, so the commit carries the
+# skip-ci marker.
 
 on:
   schedule:
@@ -18,9 +23,9 @@ on:
       - "README.md"
       - ".github/workflows/contributors.yml"
 
+# The push uses the deploy key; the token only reads the contributors API.
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   readme:
@@ -29,6 +34,8 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: main
+          ssh-key: ${{ secrets.CONTRIBUTORS_DEPLOY_KEY }}
           persist-credentials: true
 
       - name: Live demo from py-harness
@@ -57,25 +64,21 @@ jobs:
           model: gpt-4o-mini
           model-api-key: ${{ secrets.OPENAI_API_KEY }}
 
-      - name: Land the refresh on main
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+      - name: Commit the refresh to main
         run: |
           git config user.name github-actions[bot]
           git config user.email 41898282+github-actions[bot]@users.noreply.github.com
           git add README.md .github/faces docs/faces
-          git diff --cached --quiet && exit 0
-          git commit -m "docs: refresh live demo and contributors"
-          git checkout -B docs/contributors
-          git push --force --set-upstream origin docs/contributors
-          NUMBER="$(gh pr list --head docs/contributors --state open --json number -q '.[0].number')"
-          if [ -z "$NUMBER" ]; then
-            gh pr create --base "$DEFAULT_BRANCH" --head docs/contributors \
-              --title "docs: refresh live demo and contributors" \
-              --body "Filled by this Action so the wall stays current."
-            NUMBER="$(gh pr list --head docs/contributors --state open --json number -q '.[0].number')"
+          if git diff --cached --quiet; then
+            echo "The demo and the wall already match the contributors API."
+            exit 0
           fi
-          # --auto needs Settings → Pull requests → Allow auto-merge.
-          # This repo may not have that, so fall back to a squash now.
-          gh pr merge "$NUMBER" --squash --auto || gh pr merge "$NUMBER" --squash
+          git commit -m "docs: refresh live demo and contributors [skip ci]"
+          # main can move while this runs; the commit only touches the walls,
+          # which were just recomputed, so replaying it on the new tip is safe.
+          for attempt in 1 2 3; do
+            git push origin HEAD:main && exit 0
+            git pull --rebase origin main || { git rebase --abort || true; echo "::error::main changed the wall files while this ran; the next run will recompute them."; exit 1; }
+          done
+          echo "::error::Could not push to main. Check CONTRIBUTORS_DEPLOY_KEY is a write deploy key and that deploy keys may bypass the main ruleset."
+          exit 1

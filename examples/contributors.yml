@@ -3,58 +3,33 @@
 #   <!-- readme: contributors,bots/- -start -->
 #   <!-- readme: contributors,bots/- -end -->
 #
-# Opens a pull request on a protected default branch instead of pushing.
-# Needs Settings → Actions → General → Allow GitHub Actions to create
-# and approve pull requests.
-# Pin the Action to a commit SHA when the job has contents: write.
-# Unprotected default branches can `git push` instead — see the Pages
-# how-to. Do not enable caption: auto on push to README.md.
+# Save as .github/workflows/contributors.yml. It calls the reusable wall,
+# which writes the refreshed wall straight to the default branch after every
+# merge — no separate pull request, and no bot PR in the history.
+#
+# Unprotected default branch: nothing else to do.
+#
+# Protected default branch: add a write deploy key to the repository, store
+# its private half as the secret CONTRIBUTORS_DEPLOY_KEY, and let deploy keys
+# bypass the branch ruleset. `secrets: inherit` hands it to the wall.
+#
+# Do not add a pull_request trigger. A wall drawn on a pull request branch is
+# stale by the time it merges if anything else merged first, and a fork's pull
+# request cannot run it at all; the reusable wall skips pull request events.
 
 name: Contributors
 
 on:
+  push:
+    branches: [main]
   schedule:
     - cron: "17 4 * * 0"
   workflow_dispatch:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
-  readme:
-    if: github.actor != 'github-actions[bot]'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: true
-
-      - uses: YauhenBichel/readme-contributors@v1.7.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          # layout: tiles
-          # theme: midnight
-          # exclude: ghost
-          # caption: auto
-
-      - name: Open a pull request
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
-        run: |
-          git config user.name github-actions[bot]
-          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
-          git add README.md .github/contributors.svg .github/faces
-          git diff --cached --quiet && exit 0
-          git commit -m "docs: refresh README contributors"
-          git checkout -B docs/contributors
-          git push --force --set-upstream origin docs/contributors
-          NUMBER="$(gh pr list --head docs/contributors --state open --json number -q '.[0].number')"
-          if [ -z "$NUMBER" ]; then
-            gh pr create --base "$DEFAULT_BRANCH" --head docs/contributors \
-              --title "docs: refresh README contributors" \
-              --body "Filled by this Action so the wall stays current."
-            NUMBER="$(gh pr list --head docs/contributors --state open --json number -q '.[0].number')"
-          fi
-          gh pr merge "$NUMBER" --squash --auto || gh pr merge "$NUMBER" --squash
+  wall:
+    uses: YauhenBichel/readme-contributors/.github/workflows/wall.yml@v1
+    secrets: inherit
