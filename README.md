@@ -290,6 +290,9 @@ For every repository, including one with a protected default branch, copy
 reusable wall, which writes straight to the default branch after each merge —
 no separate pull request. On a protected branch, add a write deploy key,
 store it as `CONTRIBUTORS_DEPLOY_KEY`, and let deploy keys bypass the ruleset.
+If your repository is not under `YauhenBichel`, `secrets: inherit` will not reach
+the wall — GitHub only passes inherited secrets within one organisation — so pass
+the key by name: `secrets: { CONTRIBUTORS_DEPLOY_KEY: ${{ secrets.CONTRIBUTORS_DEPLOY_KEY }} }`.
 Do not run the wall on `pull_request`: a wall drawn on a pull request branch is
 stale by the time it merges if anything else merged first.
 The Action only writes files in the workspace. Your workflow decides

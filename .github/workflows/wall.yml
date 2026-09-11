@@ -46,6 +46,16 @@ name: Contributors wall
 # For a protected branch: add a write deploy key to the repository, store its
 # private half as CONTRIBUTORS_DEPLOY_KEY, and let deploy keys bypass the
 # branch ruleset. Nothing else changes.
+#
+# `secrets: inherit` only reaches a reusable workflow in the same organisation
+# or account. A repository outside YauhenBichel must name the key instead:
+#
+#       secrets:
+#         CONTRIBUTORS_DEPLOY_KEY: ${{ secrets.CONTRIBUTORS_DEPLOY_KEY }}
+#
+# Otherwise the key never arrives, the push falls back to the workflow token,
+# and a protected branch refuses it. Four MoleCare repositories did exactly
+# that; the log line WITH_DEPLOY_KEY: false is how to tell.
 
 on:
   workflow_call:
@@ -197,6 +207,6 @@ jobs:
           if [ "$WITH_DEPLOY_KEY" = "true" ]; then
             echo "::error::The deploy key could not push to $BRANCH. Check it has write access and that deploy keys may bypass the $BRANCH ruleset."
           else
-            echo "::error::The workflow token could not push to $BRANCH, which is usually a protected branch. Add a write deploy key as CONTRIBUTORS_DEPLOY_KEY and let deploy keys bypass the $BRANCH ruleset."
+            echo "::error::The workflow token could not push to $BRANCH, which is usually a protected branch. Add a write deploy key as CONTRIBUTORS_DEPLOY_KEY and let deploy keys bypass the $BRANCH ruleset. If the key is already set, this repository is probably outside the organisation that owns this workflow: secrets: inherit does not cross organisations, so list CONTRIBUTORS_DEPLOY_KEY by name under secrets: in the calling workflow instead of secrets: inherit."
           fi
           exit 1
