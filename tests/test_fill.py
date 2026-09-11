@@ -409,6 +409,13 @@ class FillTest(unittest.TestCase):
         self.assertIn("ssh-key: ${{ secrets.CONTRIBUTORS_DEPLOY_KEY }}", text)
         # Skip-ci only when the deploy key pushed; a token push starts nothing.
         self.assertIn('if [ "$WITH_DEPLOY_KEY" = "true" ]; then', text)
+        # Inherited secrets stop at the organisation boundary; a caller elsewhere
+        # must be told to pass the key by name, or it will never arrive.
+        self.assertIn("secrets: inherit does not cross organisations", text)
+        # A ${{ secrets.X }} inside a run: block is substituted before the shell
+        # runs, pasting the secret into the script. Only env: may carry one.
+        for block in re.findall(r"run: \|\n((?:\s{10,}.*\n?)+)", text):
+            self.assertNotIn("${{ secrets.", block)
         # main can move while it runs.
         self.assertIn("git pull --rebase", text)
         self.assertNotIn("gh pr create", text)

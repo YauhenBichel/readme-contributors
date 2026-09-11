@@ -11,7 +11,12 @@
 #
 # Protected default branch: add a write deploy key to the repository, store
 # its private half as the secret CONTRIBUTORS_DEPLOY_KEY, and let deploy keys
-# bypass the branch ruleset. `secrets: inherit` hands it to the wall.
+# bypass the branch ruleset. `secrets: inherit` hands it to the wall — but only
+# when this repository is in the same organisation or account as the workflow.
+# Anywhere else, replace `secrets: inherit` with:
+#
+#   secrets:
+#     CONTRIBUTORS_DEPLOY_KEY: ${{ secrets.CONTRIBUTORS_DEPLOY_KEY }}
 #
 # Do not add a pull_request trigger. A wall drawn on a pull request branch is
 # stale by the time it merges if anything else merged first, and a fork's pull
