@@ -521,7 +521,7 @@
       <p class="note"><strong>No caption.</strong> Zero-config. The wall is still written.</p>
       <p class="note"><strong>caption: auto.</strong> One italic sentence. Same people next week? The line is reused.</p>
       <p class="note"><strong>format: html.</strong> Polaroids only. Skips <code>.github/contributors.svg</code>.</p>
-      <p class="note"><strong>Protected main.</strong> Open a pull request. Copy <a href="https://github.com/YauhenBichel/readme-contributors/blob/main/examples/contributors.yml">examples/contributors.yml</a>.</p>
+      <p class="note"><strong>Protected main.</strong> Still no pull request. Add a write deploy key as <code>CONTRIBUTORS_DEPLOY_KEY</code> and let deploy keys bypass the ruleset. Copy <a href="https://github.com/YauhenBichel/readme-contributors/blob/main/examples/contributors.yml">examples/contributors.yml</a>.</p>
       <p class="note"><strong>Orphan faces.</strong> When a login leaves the wall, <code>.github/faces/{login}.svg</code> is deleted.</p>
       <p class="note"><strong>overlap.</strong> Facepile step. Default <code>0.64</code>. <code>1</code> sits faces side by side. Pages SVG only.</p>
     </section>
@@ -608,7 +608,8 @@ jobs:
           git push</pre>
       <p class="note">
         The snippet above pushes, for an unprotected default branch.
-        A protected default branch should open a pull request — copy
+        A protected default branch pushes too, through a write deploy key
+        stored as <code>CONTRIBUTORS_DEPLOY_KEY</code> — copy
         <a href="https://github.com/YauhenBichel/readme-contributors/blob/main/examples/contributors.yml">examples/contributors.yml</a>.
         Set <code>exclude</code> to omit logins. An empty wall writes
         “Be the first to appear here.” <code>caption: auto</code> writes one

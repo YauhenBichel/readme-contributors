@@ -285,8 +285,13 @@ jobs:
           git push
 ```
 
-A copy-paste workflow that opens a pull request on a protected default
-branch is in [examples/contributors.yml](./examples/contributors.yml).
+For every repository, including one with a protected default branch, copy
+[examples/contributors.yml](./examples/contributors.yml). It calls the
+reusable wall, which writes straight to the default branch after each merge —
+no separate pull request. On a protected branch, add a write deploy key,
+store it as `CONTRIBUTORS_DEPLOY_KEY`, and let deploy keys bypass the ruleset.
+Do not run the wall on `pull_request`: a wall drawn on a pull request branch is
+stale by the time it merges if anything else merged first.
 The Action only writes files in the workspace. Your workflow decides
 whether to commit them. The full case list is on the
 [site](https://yauhenbichel.github.io/readme-contributors/#cases).
