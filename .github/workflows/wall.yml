@@ -136,7 +136,7 @@ jobs:
           ssh-key: ${{ secrets.CONTRIBUTORS_DEPLOY_KEY }}
           persist-credentials: true
 
-      - uses: YauhenBichel/readme-contributors@06d127a2e5ea32a9d8d6c4a00944d14cf6ea239e # v1.7.0
+      - uses: YauhenBichel/readme-contributors@6102d1fa62437f9f04020fe53627d503ac3dd26e # v1.9.1
         with:
           token: ${{ github.token }}
           readme: ${{ inputs.readme }}
