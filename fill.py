@@ -18,7 +18,8 @@ import re
 import sys
 from pathlib import Path
 from typing import Mapping
-from urllib.error import URLError
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 API = "https://api.github.com"
@@ -33,9 +34,8 @@ _GITHUB_NOREPLY = re.compile(
     r"@users\.noreply\.github\.com$",
     re.I,
 )
-_LOGIN_TOKEN = re.compile(
-    r"^@?(?P<login>[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?)\b"
-)
+# A merged pull request's body stays editable by its author: cap what it can add.
+MAX_COAUTHORS = 5
 _CAPTION_EM = re.compile(r"<em>(.*?)</em>", re.I | re.S)
 _WALL_HREF = re.compile(r'href="https://github.com/([^"#?]+)"', re.I)
 _UNSAFE = (
@@ -162,7 +162,8 @@ def _get(url: str, token: str) -> object:
 
 def _bytes(url: str, token: str) -> bytes:
     headers = {"User-Agent": "readme-contributors-action"}
-    if token:
+    # Avatars need no token, and urllib would keep it across a redirect to any host.
+    if token and urlsplit(url).hostname == urlsplit(API).hostname:
         headers["Authorization"] = f"Bearer {token}"
     req = Request(url, headers=headers)
     with urlopen(req, timeout=20) as resp:
@@ -198,6 +199,8 @@ def parse_coauthor_logins(*texts: str) -> list[str]:
             continue
         seen.add(key)
         found.append(login)
+        if len(found) == MAX_COAUTHORS:
+            break
     return found
 
 
@@ -206,15 +209,13 @@ def _coauthor_login(rest: str) -> str:
     name_part = raw.split("<", 1)[0].strip()
     if not is_human_login(name_part):
         return ""
+    # Only Git's trailer form with a GitHub noreply address names a login. A bare
+    # login in a pull request body put anyone at all on the wall.
     email_match = re.search(r"<([^>]+)>", raw)
-    if email_match:
-        email = email_match.group(1).strip()
-        noreply = _GITHUB_NOREPLY.search(email)
-        if noreply:
-            return noreply.group("login")
+    if not email_match:
         return ""
-    token = _LOGIN_TOKEN.match(raw)
-    return token.group("login") if token else ""
+    noreply = _GITHUB_NOREPLY.search(email_match.group(1).strip())
+    return noreply.group("login") if noreply else ""
 
 
 def merge_people(
@@ -322,7 +323,15 @@ def merged_pr_people(rows: object) -> list[dict[str, str]]:
 def _person_from_login(login: str, token: str, kind: str = "") -> dict[str, str] | None:
     if not is_human_login(login, kind):
         return None
-    profile = _get(f"{API}/users/{login}", token)
+    try:
+        profile = _get(f"{API}/users/{login}", token)
+    except HTTPError as exc:
+        # A login someone typed that does not exist. Skipping it keeps the wall
+        # updating; any other error still fails the run rather than shrink it.
+        if exc.code != 404:
+            raise
+        print(f"skipped unknown login {login}", file=sys.stderr)
+        return None
     name = login
     if isinstance(profile, dict):
         if str(profile.get("type") or "").lower() == "bot":

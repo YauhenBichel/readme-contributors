@@ -28,7 +28,8 @@ A **GitHub Action** that fills a README with the people the GitHub
 contributors API lists (plus merged-PR authors when that list is
 behind). Each person is a **polaroid**: face, name, a bit of tilt.
 Each card is its own link. Bots are omitted. `exclude` drops named
-logins. Merged PR `Co-authored-by` trailers join the wall. An empty
+logins. Merged PR `Co-authored-by` trailers join the wall (GitHub noreply
+addresses only, up to five per pull request). An empty
 list writes “Be the first to appear here.” Hover a cut name to see
 the full one. `caption: auto` asks a model for one sentence that
 names this repository or the people on the wall; stock “dedicated
