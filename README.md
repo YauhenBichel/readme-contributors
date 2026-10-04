@@ -102,8 +102,9 @@ other repositories get.
   <a href="https://github.com/svkzn" title="svkzn" aria-label="svkzn"><img src="./docs/faces/svkzn.svg" width="80" height="91" alt="svkzn" /></a>
   <a href="https://github.com/Aditya-233" title="Aditya" aria-label="Aditya"><img src="./docs/faces/Aditya-233.svg" width="63" height="72" alt="Aditya" /></a>
   <a href="https://github.com/kkkhs" title="Huangshuo Kuang" aria-label="Huangshuo Kuang"><img src="./docs/faces/kkkhs.svg" width="76" height="87" alt="Huangshuo Kuang" /></a>
+  <a href="https://github.com/be-student" title="송은우" aria-label="송은우"><img src="./docs/faces/be-student.svg" width="87" height="99" alt="송은우" /></a>
 </p>
-<p align="center"><em>The contributors to the py-harness project include Yauhen Bichel, Mark Xian, Itzsaurav, svkzn, Aditya, and Huangshuo Kuang.</em></p>
+<p align="center"><em>The contributors of the py-harness project include Yauhen Bichel, Mark Xian, and Itzsaurav, among others.</em></p>
 <!-- demo: live -end -->
 
 Examples for every layout live on the
