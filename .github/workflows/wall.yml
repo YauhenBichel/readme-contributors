@@ -31,6 +31,7 @@ name: Contributors wall
 #     workflow_dispatch:
 #   permissions:
 #     contents: write
+#     pull-requests: read   # a private repository needs this to list merged PR authors
 #   jobs:
 #     wall:
 #       uses: YauhenBichel/readme-contributors/.github/workflows/wall.yml@v1
@@ -100,6 +101,10 @@ on:
 
 permissions:
   contents: write
+  # Merged pull-request authors come from the pulls API. A public repository
+  # answers any token; a private one answers 403 without this, and the wall
+  # then skips those authors with a warning instead of failing.
+  pull-requests: read
 
 jobs:
   wall:
