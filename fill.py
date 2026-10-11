@@ -377,10 +377,24 @@ def list_merged_pr_authors(
     seen: set[str] = set()
     page = 1
     while len(seen) < limit:
-        rows = _get(
-            f"{API}/repos/{repo}/pulls?state=closed&per_page=100&page={page}",
-            token,
-        )
+        try:
+            rows = _get(
+                f"{API}/repos/{repo}/pulls?state=closed&per_page=100&page={page}",
+                token,
+            )
+        except HTTPError as exc:
+            # A private repository answers 403 when the job lacks
+            # pull-requests: read. The commit authors are still on the wall, so
+            # say what is missing and go on rather than fail the whole run.
+            if exc.code != 403:
+                raise
+            print(
+                "::warning::merged pull-request authors skipped: the token "
+                f"cannot list pull requests of {repo} (HTTP 403). Give the job "
+                "`pull-requests: read` to include them.",
+                file=sys.stderr,
+            )
+            break
         batch = merged_pr_people(rows)
         extras.extend(batch)
         for extra in batch:

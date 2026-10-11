@@ -252,7 +252,9 @@ Thank you to everyone who has helped.
 ```
 
 Then call the Action. Pin it to a commit SHA when the job has
-`contents: write`.
+`contents: write`. A private repository also needs `pull-requests: read`, or
+the people who only appear as merged pull-request authors are left off, with
+a warning in the run.
 
 ```yaml
 name: Contributors
@@ -264,6 +266,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: read
 
 jobs:
   readme:

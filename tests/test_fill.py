@@ -782,6 +782,47 @@ class FillTest(unittest.TestCase):
             ],
         )
 
+    def test_private_repo_without_pull_permission_keeps_commit_authors(self) -> None:
+        from io import StringIO
+        from urllib.error import HTTPError
+
+        def fake_get(url: str, _token: str) -> object:
+            if "/contributors" in url:
+                return [{"login": "alice", "type": "User"}]
+            if url.endswith("/users/alice"):
+                return {"name": "Alice", "type": "User"}
+            if "/pulls?" in url:
+                raise HTTPError(url, 403, "Forbidden", None, None)  # type: ignore[arg-type]
+            raise AssertionError(url)
+
+        self.mod._get = fake_get  # type: ignore[method-assign]
+        env = {"GITHUB_ACTOR": "", "GITHUB_EVENT_PATH": ""}
+        with mock.patch.dict("os.environ", env, clear=False), mock.patch(
+            "sys.stderr", new_callable=StringIO
+        ) as err:
+            people = self.mod.list_people("owner/private", "token", limit=48)
+        self.assertEqual(people, [{"login": "alice", "name": "Alice"}])
+        self.assertIn("::warning::", err.getvalue())
+        self.assertIn("pull-requests: read", err.getvalue())
+
+    def test_other_pull_api_errors_still_fail_the_run(self) -> None:
+        from urllib.error import HTTPError
+
+        def fake_get(url: str, _token: str) -> object:
+            if "/contributors" in url:
+                return [{"login": "alice", "type": "User"}]
+            if url.endswith("/users/alice"):
+                return {"name": "Alice", "type": "User"}
+            if "/pulls?" in url:
+                raise HTTPError(url, 500, "Server Error", None, None)  # type: ignore[arg-type]
+            raise AssertionError(url)
+
+        self.mod._get = fake_get  # type: ignore[method-assign]
+        env = {"GITHUB_ACTOR": "", "GITHUB_EVENT_PATH": ""}
+        with mock.patch.dict("os.environ", env, clear=False):
+            with self.assertRaises(HTTPError):
+                self.mod.list_people("owner/private", "token", limit=48)
+
     def test_merged_prs_follow_second_page_for_another_author(self) -> None:
         def fake_get(url: str, _token: str) -> object:
             if "/contributors" in url:
