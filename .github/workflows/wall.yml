@@ -141,7 +141,9 @@ jobs:
           ssh-key: ${{ secrets.CONTRIBUTORS_DEPLOY_KEY }}
           persist-credentials: true
 
-      - uses: YauhenBichel/readme-contributors@6102d1fa62437f9f04020fe53627d503ac3dd26e # v1.9.1
+      # Must include fill.py from #81 (private-repo 403 skip). v1.9.1's
+      # workflow still called v1.7.0 here, which crashed private callers.
+      - uses: YauhenBichel/readme-contributors@1107f506764604470e1ccbc8c33e7d11aa71c27d # includes #81
         with:
           token: ${{ github.token }}
           readme: ${{ inputs.readme }}

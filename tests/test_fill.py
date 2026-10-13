@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 import importlib.util
+import subprocess
 import tempfile
 import unittest
 from io import StringIO
@@ -427,6 +428,25 @@ class FillTest(unittest.TestCase):
         # quotes the bad line as history, so only commands are checked.
         commands = "\n".join(l for l in text.splitlines() if not l.lstrip().startswith("#"))
         self.assertNotIn("README readme.md", commands)
+
+    def test_reusable_wall_runs_an_action_that_skips_private_pr_403(self) -> None:
+        # v1.9.1's wall.yml still called v1.7.0, which crashed on HTTP 403
+        # when a private repository listed merged pull-request authors.
+        text = (ROOT / ".github" / "workflows" / "wall.yml").read_text(encoding="utf-8")
+        self.assertIn("pull-requests: read", text)
+        match = re.search(
+            r"^      - uses: YauhenBichel/readme-contributors@([0-9a-f]{40})",
+            text,
+            re.M,
+        )
+        self.assertIsNotNone(match)
+        sha = match.group(1)
+        self.assertNotEqual(sha, "06d127a2e5ea32a9d8d6c4a00944d14cf6ea239e")
+        fill = subprocess.check_output(
+            ["git", "show", f"{sha}:fill.py"], cwd=ROOT, text=True
+        )
+        self.assertIn("cannot list pull requests of", fill)
+        self.assertIn("`pull-requests: read`", fill)
 
     def test_display_names_are_escaped(self) -> None:
         nasty = [{"login": "eve", "name": "<script>alert(1)</script>"}]
