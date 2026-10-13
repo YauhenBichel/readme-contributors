@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import re
 import importlib.util
-import subprocess
 import tempfile
 import unittest
 from io import StringIO
@@ -432,6 +431,8 @@ class FillTest(unittest.TestCase):
     def test_reusable_wall_runs_an_action_that_skips_private_pr_403(self) -> None:
         # v1.9.1's wall.yml still called v1.7.0, which crashed on HTTP 403
         # when a private repository listed merged pull-request authors.
+        # CI checkouts are shallow, so this checks the pin against known-bad
+        # SHAs and the fill.py in this tree, not `git show <pin>:fill.py`.
         text = (ROOT / ".github" / "workflows" / "wall.yml").read_text(encoding="utf-8")
         self.assertIn("pull-requests: read", text)
         match = re.search(
@@ -441,10 +442,14 @@ class FillTest(unittest.TestCase):
         )
         self.assertIsNotNone(match)
         sha = match.group(1)
-        self.assertNotEqual(sha, "06d127a2e5ea32a9d8d6c4a00944d14cf6ea239e")
-        fill = subprocess.check_output(
-            ["git", "show", f"{sha}:fill.py"], cwd=ROOT, text=True
+        self.assertNotIn(
+            sha,
+            {
+                "06d127a2e5ea32a9d8d6c4a00944d14cf6ea239e",  # v1.7.0
+                "6102d1fa62437f9f04020fe53627d503ac3dd26e",  # v1.9.1 still called v1.7.0
+            },
         )
+        fill = (ROOT / "fill.py").read_text(encoding="utf-8")
         self.assertIn("cannot list pull requests of", fill)
         self.assertIn("`pull-requests: read`", fill)
 
