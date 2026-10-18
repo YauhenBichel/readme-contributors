@@ -31,7 +31,7 @@ name: Contributors wall
 #     workflow_dispatch:
 #   permissions:
 #     contents: write
-#     pull-requests: read   # a private repository needs this to list merged PR authors
+#     pull-requests: read   # optional; a private repository needs it to list merged PR authors
 #   jobs:
 #     wall:
 #       uses: YauhenBichel/readme-contributors/.github/workflows/wall.yml@v1
@@ -99,12 +99,13 @@ on:
         description: Write deploy key, for a default branch the workflow token cannot push to
         required: false
 
-permissions:
-  contents: write
-  # Merged pull-request authors come from the pulls API. A public repository
-  # answers any token; a private one answers 403 without this, and the wall
-  # then skips those authors with a warning instead of failing.
-  pull-requests: read
+# No `permissions:` here on purpose. A called workflow may not ask for more
+# than its caller grants: when this file asked for `pull-requests: read`, every
+# caller granting only `contents: write` failed at startup, before any job ran.
+# Without a block the job takes the caller's token as it is. `contents: write`
+# is needed to commit the wall. `pull-requests: read` is needed only in a
+# private repository, to list merged pull-request authors; without it the wall
+# skips them with a warning instead of failing.
 
 jobs:
   wall:

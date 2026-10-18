@@ -394,6 +394,15 @@ class FillTest(unittest.TestCase):
         # A pull_request trigger is how a wall goes stale: see wall.yml.
         self.assertIsNone(re.search(r"^\s*pull_request(_target)?:", text, re.M))
 
+    def test_reusable_wall_asks_for_no_permissions_of_its_own(self) -> None:
+        # A called workflow may not ask for more than its caller grants. When
+        # wall.yml asked for pull-requests: read, every caller granting only
+        # contents: write failed at startup on every run, before any job ran.
+        # The job takes the caller's token instead.
+        text = (ROOT / ".github" / "workflows" / "wall.yml").read_text(encoding="utf-8")
+        self.assertIsNone(re.search(r"^permissions:", text, re.M))
+        self.assertIsNone(re.search(r"^    permissions:", text, re.M))
+
     def test_reusable_wall_writes_to_the_default_branch_only(self) -> None:
         text = (ROOT / ".github" / "workflows" / "wall.yml").read_text(encoding="utf-8")
         # Asked of the API: a scheduled run's payload has no repository, so
