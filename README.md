@@ -98,7 +98,7 @@ other repositories get.
 <p align="center">
   <a href="https://github.com/YauhenBichel" title="Yauhen Bichel" aria-label="Yauhen Bichel"><img src="./docs/faces/YauhenBichel.svg" width="87" height="99" alt="Yauhen Bichel" /></a>
   <a href="https://github.com/xianjianlf2" title="Mark Xian" aria-label="Mark Xian"><img src="./docs/faces/xianjianlf2.svg" width="66" height="75" alt="Mark Xian" /></a>
-  <a href="https://github.com/ItzSaurav" title="Itzsaurav" aria-label="Itzsaurav"><img src="./docs/faces/ItzSaurav.svg" width="72" height="82" alt="Itzsaurav" /></a>
+  <a href="https://github.com/ItzSaurav" title="saurav" aria-label="saurav"><img src="./docs/faces/ItzSaurav.svg" width="72" height="82" alt="saurav" /></a>
   <a href="https://github.com/svkzn" title="svkzn" aria-label="svkzn"><img src="./docs/faces/svkzn.svg" width="80" height="91" alt="svkzn" /></a>
   <a href="https://github.com/Aditya-233" title="Aditya" aria-label="Aditya"><img src="./docs/faces/Aditya-233.svg" width="63" height="72" alt="Aditya" /></a>
   <a href="https://github.com/kkkhs" title="Huangshuo Kuang" aria-label="Huangshuo Kuang"><img src="./docs/faces/kkkhs.svg" width="76" height="87" alt="Huangshuo Kuang" /></a>
