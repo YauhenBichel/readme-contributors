@@ -1531,14 +1531,21 @@ def ask_caption(people: list[dict[str, str]], repo: str = "") -> str:
         "Never invent names or facts. Do not write stock lines about "
         "showcasing dedicated individuals. No slurs, no adult content."
     )
+    request = {
+        "model": model,
+        "temperature": 0,
+        "max_tokens": 80,
+    }
+    if "api.anthropic.com" in base:
+        # Anthropic's OpenAI-compatible endpoint rejects a temperature below
+        # 1 for current Claude models, so leave the default.
+        del request["temperature"]
     try:
         data = _post_json(
             f"{base.rstrip('/')}/chat/completions",
             key,
             {
-                "model": model,
-                "temperature": 0,
-                "max_tokens": 80,
+                **request,
                 "messages": [
                     {"role": "system", "content": system},
                     {
