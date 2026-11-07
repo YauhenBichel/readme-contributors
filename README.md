@@ -345,6 +345,24 @@ only sees a headcount. Stock “dedicated individuals” lines are
 dropped. A missing key or a 429 leaves no caption — it is not
 retried.
 
+### Other providers
+
+Any OpenAI-compatible chat endpoint works. Set `model-base-url` and pass that
+provider's key. Each example below is the OpenAI one with three lines changed.
+
+| Provider | Secret | `model` | `model-base-url` | Example |
+| --- | --- | --- | --- | --- |
+| Anthropic Claude | `ANTHROPIC_API_KEY` | `claude-haiku-5-5` | `https://api.anthropic.com/v1` | [contributors-anthropic.yml](./examples/contributors-anthropic.yml) |
+| Google Gemini | `GEMINI_API_KEY` | `gemini-3.5-flash-lite` | `https://generativelanguage.googleapis.com/v1beta/openai` | [contributors-gemini.yml](./examples/contributors-gemini.yml) |
+| Groq | `GROQ_API_KEY` | `openai/gpt-oss-20b` | `https://api.groq.com/openai/v1` | [contributors-groq.yml](./examples/contributors-groq.yml) |
+| Hugging Face | `HF_TOKEN` | `google/gemma-2-2b-it` | `https://router.huggingface.co/v1` | [contributors-huggingface.yml](./examples/contributors-huggingface.yml) |
+
+Model names were checked against each provider's docs in November 2026, not with a
+live call. Providers retire models, so if one stops answering, pick a current cheap
+chat model from that provider's list. A failed call still leaves no caption. For
+Anthropic, the Action leaves out `temperature`, because the endpoint rejects values
+below 1 for current Claude models.
+
 ### Keep credits low
 
 A caption that still names this repository or a listed person is
