@@ -372,6 +372,35 @@ people plus a missing or stock line gets one call. Use
 only. Do not run `caption: auto` on `push` to `README.md` or the
 wording will refresh itself.
 
+## FAQ
+
+### How do I add a contributors list to my README?
+
+Put the two marker comments in `README.md` and add the Action step shown under
+[How](#how). The full workflow is in
+[examples/contributors.yml](./examples/contributors.yml). It runs weekly and on
+demand.
+
+### Does it send my data anywhere?
+
+It calls the GitHub API and fetches avatars from `avatars.githubusercontent.com`.
+Nothing else is contacted unless you set `caption: auto` with a `model` and
+`model-api-key`. Then it sends the repository name, the contributor logins and display names,
+and the people count to the model endpoint you chose, to write one sentence.
+
+### Why not a table or one image?
+
+GitHub cannot make parts of one image clickable, and a table draws a grid. This
+Action writes one linked card per person.
+
+### Does it list bots?
+
+No. Bots are omitted. Use `exclude` to drop named logins too.
+
+### Does it need a model or an API key?
+
+No. The wall is rule-based. A model is optional and only writes the caption.
+
 ## Contribute
 
 This repository is public and Apache-2.0. Fork it, pick a
